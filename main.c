@@ -12,6 +12,7 @@ void ft812_init(char *str1, char *str2);
 void spi_init(void);
 void delay_ms(uint32_t msecDelay);
 void ft812_custom_font_init(void);
+void ft812_mainWindowCustom(void);
 
 GPIO_InitTypeDef GPIO_InitStructure;
 ADC_InitTypeDef ADC__InitStructure;
@@ -40,7 +41,7 @@ int main(){
   RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOB, ENABLE);
   RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOC, ENABLE);
   RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI2, ENABLE);
-
+  
   adc_init(); 
   spi_init();
   tim2_init();
@@ -50,9 +51,9 @@ int main(){
   delay_ms(1000);
   //ft812_mainwindow();
   ft812_custom_font_init();
+  ft812_mainWindowCustom();
   while(1){
-    
-    
+
     temp_actualGVSLevel_value[0] = adc_ch_array[5];
     temp_actualGVSLevel_value[1] = adc_ch_array[5];
 
@@ -65,10 +66,8 @@ int main(){
     temp_needCOLevel_value[0] = 0x30 + 6;
     temp_needCOLevel_value[1] = 0x30 + 0;    
 
-    
     string[0] = 'А';
     string[1] = ' ';
-
     
   }//while(1)
   
@@ -261,7 +260,6 @@ void delay_ms(uint32_t msecDelay){
   
 }
 
-
 /*******************DISPLAY****SECTION*****************************************/
 /******************************************************************************/
 void ft_custom_font_inter(char* string, uint8_t len){
@@ -371,24 +369,6 @@ void ft812_custom_font_init(void){
   //FT8_cmd_dl(CMD_SETBITMAP);
   FT8_cmd_setfont2(11,1000, 0);
    
-  ft_custom_font_edit("Терморегулятор");
-  FT8_cmd_text(10,10, 11, 0, outstring);
-  ft_custom_font_edit("Т.ЦО 60°"); 
-  FT8_cmd_text(10,30, 11, 0, outstring);
-  ft_custom_font_edit("Т.ГВС 47°");
-  FT8_cmd_text(10,50, 11, 0, outstring);
-  ft_custom_font_edit("Ошибка <:02>");
-  FT8_cmd_text(10,70, 11, 0, outstring);
-  ft_custom_font_edit("Настройка ^Ў");
-  FT8_cmd_text(10,90, 11, 0, outstring);  
-  ft_custom_font_edit("Какой то текст");
-  FT8_cmd_text(10,110, 11, 0, outstring);
-  ft_custom_font_edit("Еще текст");
-  FT8_cmd_text(10,130, 11, 0, outstring);
-  //ft_custom_font_edit("Хтонический пробел");
-  //FT8_cmd_text(10,150, 11, 0, outstring);  
-  
-  
   FT8_cmd_dl(BEGIN(BITMAPS));
   //FT8_cmd_dl(DL_COLOR_RGB | 0xfffc10);
   FT8_cmd_dl(BITMAP_HANDLE(1));
@@ -397,27 +377,95 @@ void ft812_custom_font_init(void){
   FT8_cmd_dl(BITMAP_SIZE(FT8_NEAREST, FT8_BORDER, FT8_BORDER, 48, 48)); 
   //FT8_cmd_dl(VERTEX2II(10,150,1,20));
 
-
-  /* display the logo */
-  FT8_cmd_dl(DL_COLOR_RGB | 0xff0000);
-  FT8_cmd_dl(BEGIN(BITMAPS));
-  FT8_cmd_dl(VERTEX_FORMAT(0));
-  FT8_cmd_setbitmap(MEM_PIC1, FT8_L4, 48, 48);
-  FT8_cmd_dl(VERTEX2F(10, 150));
-  
-  FT8_cmd_dl(DL_COLOR_RGB | 0xffff00);
-  FT8_cmd_dl(VERTEX2F(50, 150));
-  FT8_cmd_dl(DL_COLOR_RGB | 0x00ff00);
-  FT8_cmd_dl(VERTEX2F(100, 150));
-  FT8_cmd_dl(DL_END);  
-  
   FT8_cmd_dl(DL_DISPLAY);
   FT8_cmd_dl(CMD_SWAP);
   FT8_end_cmd_burst(); /* stop writing to the cmd-fifo */
   FtCmdStart();   
   
 }
+void ft812_mainWindowCustom(void){
+  FT8_start_cmd_burst();
+  FT8_cmd_dl(CMD_DLSTART);
+  FT8_cmd_dl(DL_CLEAR_RGB | 0x000000);
+  FT8_cmd_dl(DL_CLEAR | CLR_COL | CLR_STN | CLR_TAG);
 
+
+  FT8_cmd_dl(DL_COLOR_RGB | GREY_COLOR);
+    
+  uint8_t offset = 30;
+    
+  FT8_cmd_line(0,0+offset,129,0+offset,2);
+  FT8_cmd_line(0,138+offset,129,138+offset,2);
+  FT8_cmd_line(0,1+offset,0,137+offset,2);
+  FT8_cmd_line(129,1+offset,129,137+offset,2);
+
+  FT8_cmd_line(129,0+offset,259,0+offset,2);
+  FT8_cmd_line(129,138+offset,259,138+offset,2);
+  FT8_cmd_line(129,1+offset,129,137+offset,2);
+  FT8_cmd_line(259,1+offset,259,137+offset,2);
+
+  FT8_cmd_line(0,139+offset,319,139+offset,2);
+  FT8_cmd_line(0,139+offset,0,239,2);
+  FT8_cmd_line(0,239,319,239,2);
+  FT8_cmd_line(319,139+offset,319,239,2); 
+    
+  FT8_cmd_line(64,139+offset,64,239+offset,2);
+  FT8_cmd_line(128,139+offset,128,239+offset,2);
+  FT8_cmd_line(194,139+offset,194,239+offset,2);
+  FT8_cmd_line(259,139+offset,259,239+offset,2);
+
+  
+  FT8_cmd_dl(DL_COLOR_RGB | 0xffff00);
+  ft_custom_font_edit("Терморегулятор");
+  FT8_cmd_text(10,5, 11, 0, outstring);
+  FT8_cmd_text(315,5, 23, 2048, "16.03.20 18:56");
+  
+  ft_custom_font_edit("Уст. Т.ЦО"); //60°
+  FT8_cmd_text(10,10+offset, 11, 0, outstring);
+  FT8_cmd_text(80,40+offset, 25, 2048, "76");
+  FT8_cmd_text(85,40+offset, 19, 2048, "\xf8");
+  //ft_custom_font_edit("Т.ЦО"); //60°
+  //FT8_cmd_text(10,60+offset, 11, 0, outstring);  
+  FT8_cmd_text(60,90+offset, 25, 2048, "72");
+  FT8_cmd_text(65,90+offset, 19, 2048, "\xf8");
+  
+  ft_custom_font_edit("Уст. Т.ГВС");// 47°
+  FT8_cmd_text(140,10+offset, 11, 0, outstring);
+  FT8_cmd_text(210,40+offset, 25, 2048, "65");
+  FT8_cmd_text(215,40+offset, 19, 2048, "\xf8");
+  //ft_custom_font_edit("Т.ГВС");// 47°
+  //FT8_cmd_text(140,60+offset, 11, 0, outstring);  
+  FT8_cmd_text(190,90+offset, 25, 2048, "53");
+  FT8_cmd_text(195,90+offset, 19, 2048, "\xf8");
+  
+  /*
+  ft_custom_font_edit("Ошибка <:02>");
+  FT8_cmd_text(10,70, 11, 0, outstring);
+  ft_custom_font_edit("Настройка ^Ў");
+  FT8_cmd_text(10,90, 11, 0, outstring);  
+  ft_custom_font_edit("Какой то текст");
+  FT8_cmd_text(10,110, 11, 0, outstring);
+  ft_custom_font_edit("Еще текст");
+  FT8_cmd_text(10,130, 11, 0, outstring);
+  */
+  
+  /* display the logo */
+  FT8_cmd_dl(DL_COLOR_RGB | 0xff0000);
+  FT8_cmd_dl(BEGIN(BITMAPS));
+  FT8_cmd_dl(VERTEX_FORMAT(0));
+  FT8_cmd_setbitmap(MEM_PIC1, FT8_L4, 48, 48);
+  FT8_cmd_dl(VERTEX2F(80, 80));
+  
+  FT8_cmd_dl(DL_COLOR_RGB | 0xffff00);
+  FT8_cmd_dl(VERTEX2F(210, 80));
+  
+  FT8_cmd_dl(DL_END);    
+
+  FT8_cmd_dl(DL_DISPLAY);
+  FT8_cmd_dl(CMD_SWAP);
+  FT8_end_cmd_burst(); /* stop writing to the cmd-fifo */
+  FtCmdStart();    
+}
 
 void ft812_mainwindow(void){
     FT8_start_cmd_burst();
