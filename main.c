@@ -7,12 +7,14 @@
 void button_port_config(void);
 void tim2_init(void);
 void adc_init(void);
+void gpio_init(void);
 void ft812_mainwindow(void);
 void ft812_init(char *str1, char *str2);
 void spi_init(void);
 void delay_ms(uint32_t msecDelay);
 void ft812_custom_font_init(void);
 void ft812_mainWindowCustom(void);
+void ft812_paramWindowCustom(void);
 
 GPIO_InitTypeDef GPIO_InitStructure;
 ADC_InitTypeDef ADC__InitStructure;
@@ -35,6 +37,15 @@ extern const uint8_t PictT[1152];
 char string[10];
 char outstring[50];
 
+//Button variables
+uint16_t btnCommonCnt = 0, btnPlusCnt = 0, btnMinusCnt = 0, btnAcceptCnt = 0, btnCancelCnt = 0;
+uint8_t btnPlusState = 0, btnMinusState = 0, btnAcceptState = 0, btnCancelState = 0;
+uint8_t btnPlusPreState = 0, btnMinusPreState = 0, btnAcceptPreState = 0, btnCancelPreState = 0;
+uint8_t btnPlusShortPressEventCnt = 0, btnMinusShortPressEventCnt = 0, btnAcceptShortPressEventCnt = 0, btnCancelShortPressEventCnt = 0;
+uint16_t btnPlusLongPressTimeCnt = 0, btnMinusLongPressTimeCnt = 0, btnAcceptLongPressTimeCnt = 0, btnCancelLongPressTimeCnt = 0;
+uint8_t btnPlusLongPressEvent = 0, btnMinusLongPressEvent = 0, btnAcceptLongPressEvent = 0, btnCancelLongPressEvent = 0;
+uint16_t piezoShortTimerCnt = 0, piezoShortCnt = 0; 
+
 /******************************************************************************/
 int main(){
   RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOA, ENABLE);
@@ -43,6 +54,7 @@ int main(){
   RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI2, ENABLE);
   
   adc_init(); 
+  gpio_init();
   spi_init();
   tim2_init();
   
@@ -51,7 +63,8 @@ int main(){
   delay_ms(1000);
   //ft812_mainwindow();
   ft812_custom_font_init();
-  ft812_mainWindowCustom();
+  //ft812_mainWindowCustom();
+  ft812_paramWindowCustom();
   while(1){
 
     temp_actualGVSLevel_value[0] = adc_ch_array[5];
@@ -74,7 +87,34 @@ int main(){
 }//main()
 
 /******************************************************************************/
-void adc_init(){ 
+void gpio_init(void){
+    GPIO_InitTypeDef BASE_GPIO_InitStructure;
+    //piezo
+    BASE_GPIO_InitStructure.GPIO_Pin = GPIO_Pin_15;
+    BASE_GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
+    BASE_GPIO_InitStructure.GPIO_Speed = GPIO_Speed_Level_1;
+    BASE_GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+    BASE_GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_DOWN;
+    GPIO_Init(GPIOA, &BASE_GPIO_InitStructure);
+    
+    //termostate
+    BASE_GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1;
+    BASE_GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
+    BASE_GPIO_InitStructure.GPIO_Speed = GPIO_Speed_Level_1;
+    BASE_GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+    BASE_GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_DOWN;
+    GPIO_Init(GPIOA, &BASE_GPIO_InitStructure);
+    
+    //user buttons PC4 - B1 PC5 - B3 PC6 - B2 PC7 - B4
+    BASE_GPIO_InitStructure.GPIO_Pin = GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_7;
+    BASE_GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
+    BASE_GPIO_InitStructure.GPIO_Speed = GPIO_Speed_Level_1;
+    BASE_GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+    BASE_GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_DOWN;
+    GPIO_Init(GPIOC, &BASE_GPIO_InitStructure);    
+}
+/******************************************************************************/
+void adc_init(void){ 
     RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);  
 
     DMA__InitStructure.DMA_BufferSize = 8;
@@ -198,6 +238,144 @@ void TIM2_IRQHandler(void){
     if(main_counter >= 10000)main_counter = 0;//1sec
     if(delay_ms_counter != 0)delay_ms_counter--;
   
+    btnCommonCnt++;
+    if(BTN_PLUS_RESPONSE == 1)btnPlusCnt++;
+    if(BTN_MINUS_RESPONSE == 1)btnMinusCnt++;
+    if(BTN_ACCEPT_RESPONSE == 1)btnAcceptCnt++;
+    if(BTN_CANCEL_RESPONSE == 1)btnCancelCnt++;
+    
+    if(btnCommonCnt >= BUTTON_RESPONSE_PERIOD){
+      if(btnPlusCnt  > BUTTON_UNBOUNCE){
+        btnPlusState = 1;
+        if(btnPlusPreState == 0){
+          btnPlusLongPressTimeCnt = 0;
+        }
+        else{
+          if(btnPlusLongPressTimeCnt <= 15)btnPlusLongPressTimeCnt++;
+          if(btnPlusLongPressTimeCnt == 15){
+            btnPlusLongPressEvent = 1;
+            piezoShortCnt = 1000;
+          }
+        }
+      }
+      else{
+        btnPlusState = 0;
+        if(btnPlusPreState == 1){
+          if(btnPlusLongPressEvent == 1)btnPlusLongPressEvent = 0;
+          else{
+            btnPlusShortPressEventCnt = 1;
+            piezoShortCnt = 1000;
+          }
+          btnPlusLongPressTimeCnt = 0;
+        }
+      }
+      if(btnMinusCnt > BUTTON_UNBOUNCE){
+        btnMinusState = 1;
+        if(btnMinusPreState == 0){
+          btnMinusLongPressTimeCnt = 0;
+        }
+        else{
+          if(btnMinusLongPressTimeCnt <= 15)btnMinusLongPressTimeCnt++;
+          if(btnMinusLongPressTimeCnt == 15){
+            btnMinusLongPressEvent = 1;
+            piezoShortCnt = 1000;
+          }
+        }
+      }
+      else{
+        btnMinusState = 0;
+        if(btnMinusPreState == 1){
+          if(btnMinusLongPressEvent == 1)btnMinusLongPressEvent = 0;
+          else{
+            btnMinusShortPressEventCnt = 1;
+            piezoShortCnt = 1000;
+          }
+          btnMinusLongPressTimeCnt = 0;
+        }
+      }
+      if(btnAcceptCnt > BUTTON_UNBOUNCE){
+        btnAcceptState = 1;
+        if(btnAcceptPreState == 0){
+          btnAcceptLongPressTimeCnt = 0;
+        }
+        else{
+          if(btnAcceptLongPressTimeCnt <= 15)btnAcceptLongPressTimeCnt++;
+          if(btnAcceptLongPressTimeCnt == 15){
+            btnAcceptLongPressEvent = 1;
+            piezoShortCnt = 1000;
+          }
+        }
+      }
+      else{
+        btnAcceptState = 0;
+        if(btnAcceptPreState == 1){
+          if(btnAcceptLongPressEvent == 1)btnAcceptLongPressEvent = 0;
+          else{
+            btnAcceptShortPressEventCnt = 1;
+            piezoShortCnt = 1000;
+          }
+          btnAcceptLongPressTimeCnt = 0;
+        }
+      }        
+      if(btnCancelCnt > BUTTON_UNBOUNCE){
+        btnCancelState = 1;
+        if(btnCancelPreState == 0){
+          btnCancelLongPressTimeCnt = 0;
+        }
+        else{
+          if(btnCancelLongPressTimeCnt <= 15)btnCancelLongPressTimeCnt++;
+          if(btnCancelLongPressTimeCnt == 15){
+            btnCancelLongPressEvent = 1;
+            piezoShortCnt = 1000;
+          }
+        }
+      }
+      else{
+        btnCancelState = 0;
+        if(btnCancelPreState == 1){
+          if(btnCancelLongPressEvent == 1)btnCancelLongPressEvent = 0;
+          else{
+            btnCancelShortPressEventCnt = 1;
+            piezoShortCnt = 1000;
+          }
+          btnCancelLongPressTimeCnt = 0;
+        }
+      } 
+      
+      btnCommonCnt = 0; 
+      btnPlusCnt = 0; btnPlusPreState = btnPlusState;
+      btnMinusCnt = 0; btnMinusPreState = btnMinusState;
+      btnAcceptCnt = 0; btnAcceptPreState = btnAcceptState;
+      btnCancelCnt = 0; btnCancelPreState = btnCancelState;
+      
+    }
+    
+    if(piezoShortCnt != 0){
+      piezoShortCnt--;
+      piezoShortTimerCnt++;
+      if(piezoShortTimerCnt == 1)
+        PIEZO_HIGH;
+      if(piezoShortTimerCnt >= 2){
+        PIEZO_LOW;
+        piezoShortTimerCnt = 0;
+      }
+      
+    }
+    if(piezoShortCnt == 0){
+      piezoShortCnt = 0;
+      PIEZO_LOW;
+    }
+    
+   
+    
+/*    
+uint16_t btnPlusCnt = 0, btnMinusCnt = 0, btnAcceptCnt = 0, btnCancelCnt = 0;
+uint8_t btnPlusState = 0, btnMinusState = 0, btnAcceptState = 0, btnCancelState = 0;
+uint8_t btnPlusPreState = 0, btnMinusPreState = 0, btnAcceptPreState = 0, btnCancelPreState = 0;
+uint8_t btnPlusShortPressEventCnt = 0, btnMinusShortPressEventCnt = 0, btnAcceptShortPressEventCnt = 0, btnCancelShortPressEventCnt = 0;
+uint16_t btnPlusLongPressTimeCnt = 0, btnMinusLongPressTimeCnt = 0, btnAcceptLongPressTimeCnt = 0, btnCancelLongPressTimeCnt = 0;
+uint8_t btnPlusLongPressEvent = 0, btnMinusLongPressEvent = 0, btnAcceptLongPressEvent = 0, btnCancelLongPressEvent = 0;
+*/
 /*
   if(display_refresh_cnt != 0){
     display_tag = FtGetTouchTag();
@@ -269,7 +447,6 @@ void ft_custom_font_inter(char* string, uint8_t len){
     if(string[ilen] <= 0x41)outstring[ilen] = string[ilen]-31;
   }
   outstring[len] = '\0';
-
 }
 void ft_custom_font_edit(char* string){
   uint8_t ilen = 0;
@@ -280,11 +457,9 @@ void ft_custom_font_edit(char* string){
     if(string[ilen] == 'Ў')outstring[ilen] = 117;
     if(string[ilen] == '°')outstring[ilen] = 99;
     
-    
     ilen++;
   }
   outstring[ilen] = '\0';
-
 }
 
 //while(text[textindex] != 0)
@@ -460,6 +635,54 @@ void ft812_mainWindowCustom(void){
   FT8_cmd_dl(VERTEX2F(210, 80));
   
   FT8_cmd_dl(DL_END);    
+
+  FT8_cmd_dl(DL_DISPLAY);
+  FT8_cmd_dl(CMD_SWAP);
+  FT8_end_cmd_burst(); /* stop writing to the cmd-fifo */
+  FtCmdStart();    
+}
+
+void ft812_paramWindowCustom(void){
+  FT8_start_cmd_burst();
+  FT8_cmd_dl(CMD_DLSTART);
+  FT8_cmd_dl(DL_CLEAR_RGB | 0x000000);
+  FT8_cmd_dl(DL_CLEAR | CLR_COL | CLR_STN | CLR_TAG);
+
+
+  FT8_cmd_dl(DL_COLOR_RGB | GREY_COLOR);
+    
+  uint8_t offset = 20;
+
+  
+  FT8_cmd_dl(DL_COLOR_RGB | 0xeb9123);
+  ft_custom_font_edit("Основное меню"); FT8_cmd_text(10,5, 11, 0, outstring);
+  FT8_cmd_line(0,25,319,25,3);
+  FT8_cmd_dl(DL_COLOR_RGB | 0x246e37);
+  FT8_cmd_rect(0, 30, 319, 50, 1);
+  FT8_cmd_rect(0, 70, 319, 90, 1);
+  FT8_cmd_rect(0, 110, 319, 130, 1);
+  FT8_cmd_rect(0, 150, 319, 170, 1);
+  FT8_cmd_rect(0, 190, 319, 210, 1);
+  
+  FT8_cmd_dl(DL_COLOR_RGB | 0xffff00);
+  ft_custom_font_edit("Запуск"); FT8_cmd_text(10,10+offset, 11, 0, outstring);
+  
+  ft_custom_font_edit("Ручной режим"); FT8_cmd_text(10,30+offset, 11, 0, outstring);
+
+  ft_custom_font_edit("Авто"); FT8_cmd_text(10,50+offset, 11, 0, outstring);
+
+  ft_custom_font_edit("Шнек"); FT8_cmd_text(10,70+offset, 11, 0, outstring);  
+
+  ft_custom_font_edit("Вентилятор"); FT8_cmd_text(10,90+offset, 11, 0, outstring); 
+  
+  ft_custom_font_edit("Температура"); FT8_cmd_text(10,110+offset, 11, 0, outstring); 
+  
+  
+  //ft_custom_font_edit("Т.ЦО"); //60°
+  //FT8_cmd_text(10,60+offset, 11, 0, outstring);  
+  //FT8_cmd_text(60,90+offset, 25, 2048, "72");
+  //FT8_cmd_text(65,90+offset, 19, 2048, "\xf8");
+     
 
   FT8_cmd_dl(DL_DISPLAY);
   FT8_cmd_dl(CMD_SWAP);
