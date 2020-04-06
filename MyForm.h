@@ -31,8 +31,11 @@ namespace ConsoleSerial {
 		UInt16 dowBoyX = 0;
 		UInt16 dowBoyY = 0;
 		UInt16 dowBoyZ = 0;
+		Int16 dowBoyYC = 0;
+		Int16 dowBoyZC = 0;
 		UInt16 netAddress = 1;
-		Bitmap^ bm = gcnew Bitmap("frame_mf_2148.png");
+		//Bitmap^ bm = gcnew Bitmap("frame_mf_2148.png");
+		
 		UInt16 crcInit = 0xffff;
 		Byte imageOrder = 10;
 
@@ -42,6 +45,11 @@ namespace ConsoleSerial {
 	private: System::Windows::Forms::PictureBox^ pictureBox1;
 	private: System::Windows::Forms::Button^ buttonImageUpdate;
 	private: System::Windows::Forms::Timer^ timer1;
+	private: System::Windows::Forms::Label^ label4;
+	private: System::Windows::Forms::Label^ label5;
+	private: System::Windows::Forms::TextBox^ textBoxYC;
+	private: System::Windows::Forms::TextBox^ textBoxZC;
+
 
 		static array<UInt16>^ crcTable = gcnew array<UInt16>{
 		0x0000, 0xC0C1, 0xC181, 0x0140, 0xC301, 0x03C0, 0x0280, 0xC241,
@@ -196,6 +204,10 @@ namespace ConsoleSerial {
 			this->pictureBox1 = (gcnew System::Windows::Forms::PictureBox());
 			this->buttonImageUpdate = (gcnew System::Windows::Forms::Button());
 			this->timer1 = (gcnew System::Windows::Forms::Timer(this->components));
+			this->label4 = (gcnew System::Windows::Forms::Label());
+			this->label5 = (gcnew System::Windows::Forms::Label());
+			this->textBoxYC = (gcnew System::Windows::Forms::TextBox());
+			this->textBoxZC = (gcnew System::Windows::Forms::TextBox());
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->pictureBox1))->BeginInit();
 			this->SuspendLayout();
 			// 
@@ -289,7 +301,7 @@ namespace ConsoleSerial {
 			this->buttonSend->BackColor = System::Drawing::SystemColors::Control;
 			this->buttonSend->Enabled = false;
 			this->buttonSend->FlatStyle = System::Windows::Forms::FlatStyle::System;
-			this->buttonSend->Location = System::Drawing::Point(248, 211);
+			this->buttonSend->Location = System::Drawing::Point(250, 264);
 			this->buttonSend->Name = L"buttonSend";
 			this->buttonSend->Size = System::Drawing::Size(75, 23);
 			this->buttonSend->TabIndex = 7;
@@ -300,7 +312,7 @@ namespace ConsoleSerial {
 			// textBoxRX
 			// 
 			this->textBoxRX->Enabled = false;
-			this->textBoxRX->Location = System::Drawing::Point(12, 351);
+			this->textBoxRX->Location = System::Drawing::Point(14, 404);
 			this->textBoxRX->Name = L"textBoxRX";
 			this->textBoxRX->Size = System::Drawing::Size(230, 21);
 			this->textBoxRX->TabIndex = 8;
@@ -308,7 +320,7 @@ namespace ConsoleSerial {
 			// 
 			// textBoxTX
 			// 
-			this->textBoxTX->Location = System::Drawing::Point(12, 324);
+			this->textBoxTX->Location = System::Drawing::Point(14, 377);
 			this->textBoxTX->Name = L"textBoxTX";
 			this->textBoxTX->Size = System::Drawing::Size(230, 21);
 			this->textBoxTX->TabIndex = 9;
@@ -319,7 +331,7 @@ namespace ConsoleSerial {
 			this->buttonSendCustom->BackColor = System::Drawing::SystemColors::Control;
 			this->buttonSendCustom->Enabled = false;
 			this->buttonSendCustom->FlatStyle = System::Windows::Forms::FlatStyle::System;
-			this->buttonSendCustom->Location = System::Drawing::Point(245, 322);
+			this->buttonSendCustom->Location = System::Drawing::Point(247, 375);
 			this->buttonSendCustom->Name = L"buttonSendCustom";
 			this->buttonSendCustom->Size = System::Drawing::Size(75, 50);
 			this->buttonSendCustom->TabIndex = 10;
@@ -353,11 +365,11 @@ namespace ConsoleSerial {
 			// 
 			this->comboBoxCMD->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
 			this->comboBoxCMD->FormattingEnabled = true;
-			this->comboBoxCMD->Items->AddRange(gcnew cli::array< System::Object^  >(7) {
+			this->comboBoxCMD->Items->AddRange(gcnew cli::array< System::Object^  >(9) {
 				L"Set Direction", L"Set Speed", L"Set Pulse count",
-					L"Set XYZ position", L"Set X", L"Set Y", L"Set Z"
+					L"Set XYZ position", L"Set X", L"Set Y", L"Set Z", L"Set Y(centered)", L"Set Z(centered)"
 			});
-			this->comboBoxCMD->Location = System::Drawing::Point(121, 213);
+			this->comboBoxCMD->Location = System::Drawing::Point(123, 266);
 			this->comboBoxCMD->Name = L"comboBoxCMD";
 			this->comboBoxCMD->Size = System::Drawing::Size(121, 21);
 			this->comboBoxCMD->TabIndex = 13;
@@ -368,7 +380,7 @@ namespace ConsoleSerial {
 			this->label2->AutoSize = true;
 			this->label2->Font = (gcnew System::Drawing::Font(L"Tahoma", 12, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
 				static_cast<System::Byte>(204)));
-			this->label2->Location = System::Drawing::Point(117, 187);
+			this->label2->Location = System::Drawing::Point(119, 240);
 			this->label2->Name = L"label2";
 			this->label2->Size = System::Drawing::Size(42, 19);
 			this->label2->TabIndex = 14;
@@ -445,7 +457,7 @@ namespace ConsoleSerial {
 			// statusString
 			// 
 			this->statusString->Enabled = false;
-			this->statusString->Location = System::Drawing::Point(12, 265);
+			this->statusString->Location = System::Drawing::Point(14, 318);
 			this->statusString->Multiline = true;
 			this->statusString->Name = L"statusString";
 			this->statusString->Size = System::Drawing::Size(230, 49);
@@ -455,7 +467,7 @@ namespace ConsoleSerial {
 			// textBoxCRC
 			// 
 			this->textBoxCRC->Enabled = false;
-			this->textBoxCRC->Location = System::Drawing::Point(248, 265);
+			this->textBoxCRC->Location = System::Drawing::Point(250, 318);
 			this->textBoxCRC->Name = L"textBoxCRC";
 			this->textBoxCRC->Size = System::Drawing::Size(72, 21);
 			this->textBoxCRC->TabIndex = 22;
@@ -470,7 +482,7 @@ namespace ConsoleSerial {
 				L"0", L"1", L"2", L"3", L"4", L"5", L"6",
 					L"7", L"8", L"9", L"10", L"11", L"12", L"13", L"14", L"15", L"16", L"17", L"18", L"19", L"20"
 			});
-			this->comboBoxAddress->Location = System::Drawing::Point(21, 213);
+			this->comboBoxAddress->Location = System::Drawing::Point(23, 266);
 			this->comboBoxAddress->Name = L"comboBoxAddress";
 			this->comboBoxAddress->Size = System::Drawing::Size(58, 21);
 			this->comboBoxAddress->TabIndex = 23;
@@ -481,7 +493,7 @@ namespace ConsoleSerial {
 			this->label3->AutoSize = true;
 			this->label3->Font = (gcnew System::Drawing::Font(L"Tahoma", 12, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
 				static_cast<System::Byte>(204)));
-			this->label3->Location = System::Drawing::Point(12, 187);
+			this->label3->Location = System::Drawing::Point(14, 240);
 			this->label3->Name = L"label3";
 			this->label3->Size = System::Drawing::Size(66, 19);
 			this->label3->TabIndex = 24;
@@ -514,12 +526,59 @@ namespace ConsoleSerial {
 			this->timer1->Interval = 10;
 			this->timer1->Tick += gcnew System::EventHandler(this, &MyForm::Timer1_Tick);
 			// 
+			// label4
+			// 
+			this->label4->AutoSize = true;
+			this->label4->FlatStyle = System::Windows::Forms::FlatStyle::System;
+			this->label4->Font = (gcnew System::Drawing::Font(L"Tahoma", 12, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
+				static_cast<System::Byte>(204)));
+			this->label4->Location = System::Drawing::Point(130, 172);
+			this->label4->Name = L"label4";
+			this->label4->Size = System::Drawing::Size(96, 19);
+			this->label4->TabIndex = 27;
+			this->label4->Text = L"Y (centered)";
+			// 
+			// label5
+			// 
+			this->label5->AutoSize = true;
+			this->label5->FlatStyle = System::Windows::Forms::FlatStyle::System;
+			this->label5->Font = (gcnew System::Drawing::Font(L"Tahoma", 12, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
+				static_cast<System::Byte>(204)));
+			this->label5->Location = System::Drawing::Point(234, 172);
+			this->label5->Name = L"label5";
+			this->label5->Size = System::Drawing::Size(95, 19);
+			this->label5->TabIndex = 28;
+			this->label5->Text = L"Z (centered)";
+			// 
+			// textBoxYC
+			// 
+			this->textBoxYC->Location = System::Drawing::Point(121, 195);
+			this->textBoxYC->MaxLength = 7;
+			this->textBoxYC->Name = L"textBoxYC";
+			this->textBoxYC->Size = System::Drawing::Size(100, 21);
+			this->textBoxYC->TabIndex = 29;
+			this->textBoxYC->TextAlign = System::Windows::Forms::HorizontalAlignment::Center;
+			this->textBoxYC->TextChanged += gcnew System::EventHandler(this, &MyForm::TextBoxYC_TextChanged);
+			// 
+			// textBoxZC
+			// 
+			this->textBoxZC->Location = System::Drawing::Point(228, 195);
+			this->textBoxZC->MaxLength = 7;
+			this->textBoxZC->Name = L"textBoxZC";
+			this->textBoxZC->Size = System::Drawing::Size(100, 21);
+			this->textBoxZC->TabIndex = 30;
+			this->textBoxZC->TextAlign = System::Windows::Forms::HorizontalAlignment::Center;
+			// 
 			// MyForm
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->BackColor = System::Drawing::SystemColors::ActiveCaption;
 			this->ClientSize = System::Drawing::Size(1008, 579);
+			this->Controls->Add(this->textBoxZC);
+			this->Controls->Add(this->textBoxYC);
+			this->Controls->Add(this->label5);
+			this->Controls->Add(this->label4);
 			this->Controls->Add(this->buttonImageUpdate);
 			this->Controls->Add(this->pictureBox1);
 			this->Controls->Add(this->label3);
@@ -889,6 +948,70 @@ private: System::Void ButtonSend_Click(System::Object^ sender, System::EventArgs
 			;
 		}
 	}
+	if (cmdState == "Set Y(centered)") {
+		array<Byte>^ sendDataChars = gcnew array<Byte>{0x01, 0x10, 0x00, 0x06, 0x00, 0x01, 0x02, 0x00, 0x00, 0x00, 0x00};//11bytes
+		try {
+			sendDataChars[7] = Convert::ToByte(dowBoyYC >> 8);
+			sendDataChars[8] = Convert::ToByte(dowBoyYC & 0xff);
+			//sendDataChars[8] = dowBoyYC >> 8;
+
+			UInt16 temp_crc_result = CRC_Calc16(sendDataChars, sendDataChars->Length - 2);
+			this->textBoxCRC->Text = Convert::ToString(temp_crc_result, 16);
+			sendDataChars[10] = (Byte)(temp_crc_result >> 8);
+			sendDataChars[9] = (Byte)(temp_crc_result & 0xff);
+			this->_serialPort->Write(sendDataChars, 0, sendDataChars->Length);
+			try {
+				for (int i_rb = 0; i_rb < 8; i_rb++) {
+					readByteArray[i_rb] = this->_serialPort->ReadByte();
+				}
+				if (readByteArray[0] == 0x01) {
+					System::String^ formatedString = System::String::Format("0x{0,2:X2} 0x{1,2:X2} 0x{2,2:X2} 0x{3,2:X2} 0x{4,2:X2} 0x{5,2:X2} 0x{6,2:X2} 0x{7,2:X2}", \
+						readByteArray[0], readByteArray[1], readByteArray[2], readByteArray[3], readByteArray[4], \
+						readByteArray[5], readByteArray[6], readByteArray[7]);
+					//this->statusString->Text = Convert::ToString(sendDataChars->Length);
+					this->statusString->Text = formatedString;
+				}
+			}
+			catch (TimeoutException^) {
+				this->statusString->Text = "TimeoutRx_sendCmd";
+			}
+		}
+		catch (InvalidOperationException^) {
+			;
+		}
+	}
+	if (cmdState == "Set Z(centered)") {
+		array<Byte>^ sendDataChars = gcnew array<Byte>{0x01, 0x10, 0x00, 0x07, 0x00, 0x01, 0x02, 0x00, 0x00, 0x00, 0x00};//11bytes
+		try {
+			sendDataChars[7] = Convert::ToByte(dowBoyZC >> 8);
+			sendDataChars[8] = Convert::ToByte(dowBoyZC & 0xff);
+			//sendDataChars[8] = dowBoyYC >> 8;
+
+			UInt16 temp_crc_result = CRC_Calc16(sendDataChars, sendDataChars->Length - 2);
+			this->textBoxCRC->Text = Convert::ToString(temp_crc_result, 16);
+			sendDataChars[10] = (Byte)(temp_crc_result >> 8);
+			sendDataChars[9] = (Byte)(temp_crc_result & 0xff);
+			this->_serialPort->Write(sendDataChars, 0, sendDataChars->Length);
+			try {
+				for (int i_rb = 0; i_rb < 8; i_rb++) {
+					readByteArray[i_rb] = this->_serialPort->ReadByte();
+				}
+				if (readByteArray[0] == 0x01) {
+					System::String^ formatedString = System::String::Format("0x{0,2:X2} 0x{1,2:X2} 0x{2,2:X2} 0x{3,2:X2} 0x{4,2:X2} 0x{5,2:X2} 0x{6,2:X2} 0x{7,2:X2}", \
+						readByteArray[0], readByteArray[1], readByteArray[2], readByteArray[3], readByteArray[4], \
+						readByteArray[5], readByteArray[6], readByteArray[7]);
+					//this->statusString->Text = Convert::ToString(sendDataChars->Length);
+					this->statusString->Text = formatedString;
+				}
+			}
+			catch (TimeoutException^) {
+				this->statusString->Text = "TimeoutRx_sendCmd";
+			}
+		}
+		catch (InvalidOperationException^) {
+			;
+		}
+	}
 }
 private: System::Void TextBoxSpeed_TextChanged(System::Object^ sender, System::EventArgs^ e) {
 	try {
@@ -972,6 +1095,54 @@ private: System::Void TextBoxZ_TextChanged(System::Object^ sender, System::Event
 	}
 
 }
+private: System::Void TextBoxYC_TextChanged(System::Object^ sender, System::EventArgs^ e) {
+	try {
+		dowBoyYC = Convert::ToInt16(this->textBoxYC->Text);
+		if (dowBoyYC > 340) {
+			dowBoyYC = 340;
+			this->textBoxYC->Text = "340";
+		}
+		if (dowBoyYC < -340) {
+			dowBoyYC = -340;
+			this->textBoxYC->Text = "-340";
+		}
+		//this->statusString->Text = "Z pos changed";
+	}
+	catch (FormatException^) {
+		this->statusString->Text = "only numbers";
+		this->textBoxYC->Text = "0";
+		dowBoyYC = 0;
+	}
+	catch (OverflowException^) {
+		//this->statusString->Text = "to large value";
+		this->textBoxYC->Text = "340";
+		dowBoyYC = 340;
+	}
+}
+private: System::Void TextBoxZC_TextChanged(System::Object^ sender, System::EventArgs^ e) {
+	try {
+		dowBoyZC = Convert::ToInt16(this->textBoxZC->Text);
+		if (dowBoyZC > 340) {
+			dowBoyZC = 340;
+			this->textBoxZC->Text = "340";
+		}
+		if (dowBoyZC < -340) {
+			dowBoyZC = -340;
+			this->textBoxZC->Text = "-340";
+		}
+		//this->statusString->Text = "Z pos changed";
+	}
+	catch (FormatException^) {
+		this->statusString->Text = "only numbers";
+		this->textBoxZC->Text = "0";
+		dowBoyZC = 0;
+	}
+	catch (OverflowException^) {
+		//this->statusString->Text = "to large value";
+		this->textBoxYC->Text = "340";
+		dowBoyZC = 340;
+	}
+}
 private: System::UInt16 CRC_Calc16(array<Byte>^ dataArray, int length) {//array<Byte>^  //Byte *dataArray
 	 UInt16 crc = 0xffff;
 	 UInt16 table_result = 0;
@@ -1037,5 +1208,8 @@ private: System::Void Timer1_Tick(System::Object^ sender, System::EventArgs^ e) 
 	graphics->DrawImage(b, rect);
 
 }
+
+
+
 };
 }
