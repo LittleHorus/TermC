@@ -568,6 +568,7 @@ namespace ConsoleSerial {
 			this->textBoxZC->Size = System::Drawing::Size(100, 21);
 			this->textBoxZC->TabIndex = 30;
 			this->textBoxZC->TextAlign = System::Windows::Forms::HorizontalAlignment::Center;
+			this->textBoxZC->TextChanged += gcnew System::EventHandler(this, &MyForm::TextBoxZC_TextChanged);
 			// 
 			// MyForm
 			// 
@@ -1098,13 +1099,13 @@ private: System::Void TextBoxZ_TextChanged(System::Object^ sender, System::Event
 private: System::Void TextBoxYC_TextChanged(System::Object^ sender, System::EventArgs^ e) {
 	try {
 		dowBoyYC = Convert::ToInt16(this->textBoxYC->Text);
-		if (dowBoyYC > 340) {
-			dowBoyYC = 340;
-			this->textBoxYC->Text = "340";
+		if (dowBoyYC > 900) {
+			dowBoyYC = 900;
+			this->textBoxYC->Text = "900";
 		}
-		if (dowBoyYC < -340) {
-			dowBoyYC = -340;
-			this->textBoxYC->Text = "-340";
+		if (dowBoyYC < -900) {
+			dowBoyYC = -900;
+			this->textBoxYC->Text = "-900";
 		}
 		//this->statusString->Text = "Z pos changed";
 	}
@@ -1115,20 +1116,20 @@ private: System::Void TextBoxYC_TextChanged(System::Object^ sender, System::Even
 	}
 	catch (OverflowException^) {
 		//this->statusString->Text = "to large value";
-		this->textBoxYC->Text = "340";
-		dowBoyYC = 340;
+		this->textBoxYC->Text = "900";
+		dowBoyYC = 900;
 	}
 }
 private: System::Void TextBoxZC_TextChanged(System::Object^ sender, System::EventArgs^ e) {
 	try {
 		dowBoyZC = Convert::ToInt16(this->textBoxZC->Text);
-		if (dowBoyZC > 340) {
-			dowBoyZC = 340;
-			this->textBoxZC->Text = "340";
+		if (dowBoyZC > 900) {
+			dowBoyZC = 900;
+			this->textBoxZC->Text = "900";
 		}
-		if (dowBoyZC < -340) {
-			dowBoyZC = -340;
-			this->textBoxZC->Text = "-340";
+		if (dowBoyZC < -900) {
+			dowBoyZC = -900;
+			this->textBoxZC->Text = "-900";
 		}
 		//this->statusString->Text = "Z pos changed";
 	}
@@ -1139,8 +1140,8 @@ private: System::Void TextBoxZC_TextChanged(System::Object^ sender, System::Even
 	}
 	catch (OverflowException^) {
 		//this->statusString->Text = "to large value";
-		this->textBoxYC->Text = "340";
-		dowBoyZC = 340;
+		this->textBoxZC->Text = "900";
+		dowBoyZC = 900;
 	}
 }
 private: System::UInt16 CRC_Calc16(array<Byte>^ dataArray, int length) {//array<Byte>^  //Byte *dataArray
@@ -1208,7 +1209,6 @@ private: System::Void Timer1_Tick(System::Object^ sender, System::EventArgs^ e) 
 	graphics->DrawImage(b, rect);
 
 }
-
 
 
 };
