@@ -1,3 +1,13 @@
+#define MENU_LEVEL_MAIN 0
+#define MENU_LEVEL_SETTINGS 1
+#define MENU_LEVEL_PARAMETERS 2
+#define MENU_LEVEL_ACCEPT 3
+
+#define MANUAL 0
+#define AUTO 1
+#define FAN_OFF 0
+#define FAN_ON 1
+
 #define BUTTON_RESPONSE_PERIOD  1000 //100ms
 #define BUTTON_UNBOUNCE         700 
 #define BTN_PLUS_RESPONSE       GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_4)

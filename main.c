@@ -4,6 +4,16 @@
 #include "ft812.h"
 
 
+typedef struct sRTC_struct{
+		 unsigned year : 6; 
+		 unsigned month : 4;
+		 unsigned week : 3; 
+		 unsigned date : 5;
+		 unsigned hour : 5;
+		 unsigned minute :6;
+		 unsigned sec : 6;
+}RTC_struct;
+
 void button_port_config(void);
 void tim2_init(void);
 void adc_init(void);
@@ -15,11 +25,17 @@ void delay_ms(uint32_t msecDelay);
 void ft812_custom_font_init(void);
 void ft812_mainWindowCustom(void);
 void ft812_paramWindowCustom(void);
-
+void ft812_settingsWindowCustom(void);
+void ft812_acceptWindowCustom(void);
+void RTC_Update(RTC_struct volatile *value);
+void rtc_init(void);
+void RTC_Config(void);
 GPIO_InitTypeDef GPIO_InitStructure;
 ADC_InitTypeDef ADC__InitStructure;
 DMA_InitTypeDef DMA__InitStructure;
-
+RTC_InitTypeDef   RTC_InitStructure;
+RTC_TimeTypeDef RTC_Time;
+RTC_DateTypeDef RTC_Date;
 #define MEM_PIC1 (17493+148+1000)
 
 uint8_t regIdValue = 0;
@@ -27,7 +43,10 @@ uint8_t regIdValue = 0;
 uint16_t adc_ch_array[8];
 uint32_t main_counter = 0;
 uint32_t delay_ms_counter = 0;
+uint16_t rtc_1sec_cnt = 0;
 uint8_t temp_actualGVSLevel_value[2], temp_needGVSLevel_value[2], temp_actualCOLevel_value[2], temp_needCOLevel_value[2];
+
+uint16_t tim16Input = 0;
 
 float temperature[8];//4*8 = 32 
 uint16_t temperature_u16[8];
@@ -46,27 +65,129 @@ uint16_t btnPlusLongPressTimeCnt = 0, btnMinusLongPressTimeCnt = 0, btnAcceptLon
 uint8_t btnPlusLongPressEvent = 0, btnMinusLongPressEvent = 0, btnAcceptLongPressEvent = 0, btnCancelLongPressEvent = 0;
 uint16_t piezoShortTimerCnt = 0, piezoShortCnt = 0; 
 
+//menu variables
+uint8_t menuLevel = 0;//0 - MainMenu, 1 - SettingsMenu, 2 - ParametersMenu, 3 - AcceptMenu
+uint16_t displayRefreshTime = 0;
+
+//создаем экземпляр этого типа
+volatile RTC_struct rtc;
+struct termC_Struct{
+    uint8_t termRegime;//режим работы котла - ручной/авто
+    uint8_t screwRegime;//работа шнека ручной/авто
+    uint8_t screwSpeed;//скорость работы шнека not used
+    //uint8_t screwState;
+    uint16_t screwCurrentLimit;//ток заклинивания шнека mA
+    uint8_t fanState;//работа вентилятора
+    uint8_t fanSpeed;//скорость работы вентилятора
+    uint8_t tempCO_settled;//ЦО установленная температура
+    uint8_t tempCO_current;//ЦО текущая температура
+    uint8_t tempHW_settled;//ГВС установленная температура
+    uint8_t tempHW_current;//ГВС текущая температура
+    uint8_t tempControlMode;//определяет, какой из датчиков используется для контроля работы котла
+    uint8_t tempControlState;//определяет стадию работы - розжиг или поддержание или тушение
+    int8_t tempOutdoor;
+    uint8_t tempBunker;
+    uint8_t tempScrew;
+    uint8_t termTermostate;// two states 0 and 1
+    
+
+}termStruct;
+void fan_control(uint8_t fanSpeed){
+  
+  //
+  
+}
+void TIM16_IRQHandler(void) {
+  if(TIM_GetITStatus(TIM16, TIM_IT_CC1) == SET) 
+  {
+    /* Clear TIM16 Capture compare interrupt pending bit */
+    TIM_ClearITPendingBit(TIM16, TIM_IT_CC1);
+    
+    tim16Input = TIM_GetCapture1(TIM16);
+    
+
+  }
+}
+
+void tim_input(void){
+  GPIO_InitTypeDef GPIO_InitStructure;
+  NVIC_InitTypeDef NVIC_InitStructure;
+  TIM_ICInitTypeDef  TIM_ICInitStructure;
+  /* TIM16 clock enable */
+  RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM16, ENABLE);
+
+  /* GPIOB clock enable */
+  RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOB, ENABLE);
+  
+  /* TIM16 channel 1 pin (PB.8) configuration */
+  GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_8;
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
+  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+  GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+  GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
+  GPIO_Init(GPIOB, &GPIO_InitStructure);
+
+  /* Connect TIM pin to AF2 */
+  GPIO_PinAFConfig(GPIOB, GPIO_PinSource8, GPIO_AF_2);
+  
+  /* Enable the TIM1 global Interrupt */
+  NVIC_InitStructure.NVIC_IRQChannel = TIM16_IRQn;
+  NVIC_InitStructure.NVIC_IRQChannelPriority = 0;
+  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+  NVIC_Init(&NVIC_InitStructure);  
+  
+  TIM_ICInitStructure.TIM_Channel = TIM_Channel_1;
+  TIM_ICInitStructure.TIM_ICPolarity = TIM_ICPolarity_Rising;
+  TIM_ICInitStructure.TIM_ICSelection = TIM_ICSelection_DirectTI;
+  TIM_ICInitStructure.TIM_ICPrescaler = TIM_ICPSC_DIV1;
+  TIM_ICInitStructure.TIM_ICFilter = 0x0;
+
+  TIM_ICInit(TIM16, &TIM_ICInitStructure);
+  
+  /* TIM enable counter */
+  TIM_Cmd(TIM16, ENABLE);
+
+  /* Enable the CC1 Interrupt Request */
+  TIM_ITConfig(TIM16, TIM_IT_CC1, ENABLE);  
+}
+
 /******************************************************************************/
 int main(){
   RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOA, ENABLE);
   RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOB, ENABLE);
   RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOC, ENABLE);
   RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI2, ENABLE);
-  
+  //rtc_init();
+  //RTC_Update(&rtc);
+  RTC_Config();
   adc_init(); 
   gpio_init();
   spi_init();
   tim2_init();
+  tim_input();
   
   DISPLAY_POWER_UP;
   ft812_init("Initialization", "please, waiting...");
   delay_ms(1000);
   //ft812_mainwindow();
   ft812_custom_font_init();
-  //ft812_mainWindowCustom();
-  ft812_paramWindowCustom();
+  ft812_mainWindowCustom();
+  //ft812_paramWindowCustom();
+  
+  termStruct.termRegime = MANUAL;
+  termStruct.screwRegime = MANUAL;
+  termStruct.screwCurrentLimit = 3000;//3A
+  termStruct.fanState = FAN_OFF;
+  termStruct.fanSpeed = 10;//10%
+  termStruct.tempCO_settled = 60;//in degree
+  termStruct.tempCO_current = 0;
+  termStruct.tempHW_settled = 60;
+  termStruct.tempHW_current = 0;
+  termStruct.tempControlMode = 0;
+  termStruct.tempControlState = 0;
+  termStruct.tempScrew = 0;
+  
   while(1){
-
     temp_actualGVSLevel_value[0] = adc_ch_array[5];
     temp_actualGVSLevel_value[1] = adc_ch_array[5];
 
@@ -79,9 +200,93 @@ int main(){
     temp_needCOLevel_value[0] = 0x30 + 6;
     temp_needCOLevel_value[1] = 0x30 + 0;    
 
-    string[0] = 'А';
-    string[1] = ' ';
+    if(menuLevel == MENU_LEVEL_MAIN){
+      if(displayRefreshTime == 0){
+        displayRefreshTime = 200;
+        ft812_mainWindowCustom();
+        
+
+      }  
+      if(btnPlusShortPressEventCnt != 0){
+        btnPlusShortPressEventCnt = 0;
+      }      
+      if(btnMinusShortPressEventCnt != 0){
+        btnMinusShortPressEventCnt = 0;
+      }      
+      if(btnAcceptShortPressEventCnt != 0){
+        menuLevel = MENU_LEVEL_SETTINGS;
+        btnAcceptShortPressEventCnt = 0;
+      }
+      if(btnCancelShortPressEventCnt != 0){
+        btnCancelShortPressEventCnt = 0;
+      }
+    }
     
+    if(menuLevel == MENU_LEVEL_SETTINGS){
+      if(displayRefreshTime == 0){
+        displayRefreshTime = 200;
+        ft812_settingsWindowCustom();
+      }      
+      if(btnPlusShortPressEventCnt != 0){
+        btnPlusShortPressEventCnt = 0;
+      }      
+      if(btnMinusShortPressEventCnt != 0){
+        btnMinusShortPressEventCnt = 0;
+      }      
+      if(btnAcceptShortPressEventCnt != 0){
+        menuLevel = MENU_LEVEL_PARAMETERS;
+        btnAcceptShortPressEventCnt = 0;
+      }      
+      if(btnCancelShortPressEventCnt != 0){
+        menuLevel = MENU_LEVEL_MAIN;
+        btnCancelShortPressEventCnt = 0;
+      }
+    }
+    
+    if(menuLevel == MENU_LEVEL_PARAMETERS){
+      if(displayRefreshTime == 0){
+        displayRefreshTime = 200;
+        ft812_paramWindowCustom();
+      }         
+      if(btnPlusShortPressEventCnt != 0){
+        btnPlusShortPressEventCnt = 0;
+      }      
+      if(btnMinusShortPressEventCnt != 0){
+        btnMinusShortPressEventCnt = 0;
+      }
+      if(btnAcceptShortPressEventCnt != 0){
+        menuLevel = MENU_LEVEL_ACCEPT;
+        btnAcceptShortPressEventCnt = 0;
+      }      
+      if(btnCancelShortPressEventCnt != 0){
+        menuLevel = MENU_LEVEL_SETTINGS;
+        btnCancelShortPressEventCnt = 0;
+      }       
+    }
+    
+    if(menuLevel == MENU_LEVEL_ACCEPT){
+      if(displayRefreshTime == 0){
+        displayRefreshTime = 200;
+        ft812_acceptWindowCustom();
+      }         
+      if(btnPlusShortPressEventCnt != 0){
+        btnPlusShortPressEventCnt = 0;
+      }      
+      if(btnMinusShortPressEventCnt != 0){
+        btnMinusShortPressEventCnt = 0;
+      }
+      if(btnAcceptShortPressEventCnt != 0){
+        menuLevel = MENU_LEVEL_PARAMETERS;
+        btnAcceptShortPressEventCnt = 0;
+      }      
+      if(btnCancelShortPressEventCnt != 0){
+        menuLevel = MENU_LEVEL_PARAMETERS;
+        btnCancelShortPressEventCnt = 0;
+      }      
+    }
+    
+    
+ 
   }//while(1)
   
 }//main()
@@ -217,7 +422,7 @@ void tim2_init(void){
   NVIC_InitTypeDef NVIC_TIM2_Init_Structure;
   //СѓРєР°Р·С‹РІР°РµРј РёСЃС‚РѕС‡РЅРёРє РїСЂРµСЂС‹РІР°РЅРёР№ - TIM2_IRQn (СЃРїРёСЃРѕРє РІСЃРµС… РІРѕР·РјРѕР¶РЅС‹С… РёСЃС‚РѕС‡РЅРёРєРѕРІ РЅР°С…РѕРґРёС‚СЃСЏ РІ С„Р°Р№Р»Рµ stm32f0xx.h)
   NVIC_TIM2_Init_Structure.NVIC_IRQChannel = TIM2_IRQn;
-  NVIC_TIM2_Init_Structure.NVIC_IRQChannelPriority = 0x00;//РїСЂРёРѕСЂРёС‚РµС‚ С‚РµРєСѓС‰РµРіРѕ РїСЂРµСЂС‹РІР°РЅРёСЏ, РѕС‚ 0 РґРѕ 3
+  NVIC_TIM2_Init_Structure.NVIC_IRQChannelPriority = 0x01;//РїСЂРёРѕСЂРёС‚РµС‚ С‚РµРєСѓС‰РµРіРѕ РїСЂРµСЂС‹РІР°РЅРёСЏ, РѕС‚ 0 РґРѕ 3
   NVIC_TIM2_Init_Structure.NVIC_IRQChannelCmd = ENABLE;  
   NVIC_Init(&NVIC_TIM2_Init_Structure); 
   
@@ -237,7 +442,14 @@ void TIM2_IRQHandler(void){
     main_counter++;
     if(main_counter >= 10000)main_counter = 0;//1sec
     if(delay_ms_counter != 0)delay_ms_counter--;
-  
+    if(displayRefreshTime != 0)displayRefreshTime--;
+    rtc_1sec_cnt++;
+    if(rtc_1sec_cnt >= 10000){
+        RTC_GetTime(RTC_Format_BCD, &RTC_Time);
+        RTC_GetDate(RTC_Format_BCD, &RTC_Date);
+        rtc_1sec_cnt = 0;
+    }
+    
     btnCommonCnt++;
     if(BTN_PLUS_RESPONSE == 1)btnPlusCnt++;
     if(BTN_MINUS_RESPONSE == 1)btnMinusCnt++;
@@ -493,7 +705,7 @@ void ft812_init(char *str1, char *str2){
     
   wReg8(REG_ROTATE, 0); 
   //Data32 = rReg32(REG_FREQUENCY);
-  wReg8(REG_PWM_DUTY, 80);
+  wReg8(REG_PWM_DUTY, 40);
   
   wReg32(REG_TOUCH_TRANSFORM_A, 0x0000f78b);
   wReg32(REG_TOUCH_TRANSFORM_B, 0x00000427);
@@ -642,7 +854,7 @@ void ft812_mainWindowCustom(void){
   FtCmdStart();    
 }
 
-void ft812_paramWindowCustom(void){
+void ft812_settingsWindowCustom(void){
   FT8_start_cmd_burst();
   FT8_cmd_dl(CMD_DLSTART);
   FT8_cmd_dl(DL_CLEAR_RGB | 0x000000);
@@ -689,7 +901,79 @@ void ft812_paramWindowCustom(void){
   FT8_end_cmd_burst(); /* stop writing to the cmd-fifo */
   FtCmdStart();    
 }
+void ft812_paramWindowCustom(void){
+  FT8_start_cmd_burst();
+  FT8_cmd_dl(CMD_DLSTART);
+  FT8_cmd_dl(DL_CLEAR_RGB | 0x000000);
+  FT8_cmd_dl(DL_CLEAR | CLR_COL | CLR_STN | CLR_TAG);
 
+
+  FT8_cmd_dl(DL_COLOR_RGB | GREY_COLOR);
+    
+  uint8_t offset = 20;
+
+  
+  FT8_cmd_dl(DL_COLOR_RGB | 0xeb9123);
+  ft_custom_font_edit("Меню параметра"); FT8_cmd_text(10,5, 11, 0, outstring);
+  FT8_cmd_line(0,25,319,25,3);
+  FT8_cmd_dl(DL_COLOR_RGB | 0x246e37);
+  FT8_cmd_rect(0, 30, 319, 50, 1);
+  FT8_cmd_rect(0, 70, 319, 90, 1);
+  FT8_cmd_rect(0, 110, 319, 130, 1);
+  FT8_cmd_rect(0, 150, 319, 170, 1);
+  FT8_cmd_rect(0, 190, 319, 210, 1);
+  
+  FT8_cmd_dl(DL_COLOR_RGB | 0xffff00);
+  ft_custom_font_edit("Параметр 1"); FT8_cmd_text(10,10+offset, 11, 0, outstring);
+  
+  ft_custom_font_edit("Параметр 2"); FT8_cmd_text(10,30+offset, 11, 0, outstring);
+
+  ft_custom_font_edit("Параметр 3"); FT8_cmd_text(10,50+offset, 11, 0, outstring);
+
+  ft_custom_font_edit("Параметр 4"); FT8_cmd_text(10,70+offset, 11, 0, outstring);  
+
+  ft_custom_font_edit("Параметр 5"); FT8_cmd_text(10,90+offset, 11, 0, outstring); 
+  
+  ft_custom_font_edit("Параметр 6"); FT8_cmd_text(10,110+offset, 11, 0, outstring); 
+  
+  
+  //ft_custom_font_edit("Т.ЦО"); //60°
+  //FT8_cmd_text(10,60+offset, 11, 0, outstring);  
+  //FT8_cmd_text(60,90+offset, 25, 2048, "72");
+  //FT8_cmd_text(65,90+offset, 19, 2048, "\xf8");
+     
+
+  FT8_cmd_dl(DL_DISPLAY);
+  FT8_cmd_dl(CMD_SWAP);
+  FT8_end_cmd_burst(); /* stop writing to the cmd-fifo */
+  FtCmdStart();  
+}
+void ft812_acceptWindowCustom(void){
+  FT8_start_cmd_burst();
+  FT8_cmd_dl(CMD_DLSTART);
+  FT8_cmd_dl(DL_CLEAR_RGB | 0x000000);
+  FT8_cmd_dl(DL_CLEAR | CLR_COL | CLR_STN | CLR_TAG);
+
+
+  FT8_cmd_dl(DL_COLOR_RGB | GREY_COLOR);
+    
+  FT8_cmd_dl(DL_COLOR_RGB | 0xeb9123);
+  ft_custom_font_edit("Подтвердить изменения:"); FT8_cmd_text(10,5, 11, 0, outstring);
+  FT8_cmd_line(0,25,319,25,3);
+  //FT8_cmd_dl(DL_COLOR_RGB | 0x246e37);
+  
+  FT8_cmd_dl(DL_COLOR_RGB | 0xffff00);
+  FT8_cmd_fgcolor(0x00a200);
+  ft_custom_font_edit("Да"); FT8_cmd_button(80, 100, 60, 60, 11, 0,outstring);
+  FT8_cmd_fgcolor(GREY_COLOR);
+  ft_custom_font_edit("Нет"); FT8_cmd_button(180, 100, 60, 60, 11, 0,outstring);
+  
+
+  FT8_cmd_dl(DL_DISPLAY);
+  FT8_cmd_dl(CMD_SWAP);
+  FT8_end_cmd_burst(); /* stop writing to the cmd-fifo */
+  FtCmdStart();    
+}
 void ft812_mainwindow(void){
     FT8_start_cmd_burst();
     FT8_cmd_dl(CMD_DLSTART); /* start the display list */
@@ -792,4 +1076,98 @@ void ft812_settingswindow(void){
     FtCmdStart();     
   
   
+}
+
+	
+void RTC_Config(void)
+{
+  NVIC_InitTypeDef NVIC_InitStructure; 
+  EXTI_InitTypeDef EXTI_InitStructure;
+  RTC_AlarmTypeDef RTC_AlarmStructure;
+  /* Enable the PWR clock */
+  RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR, ENABLE);
+  
+  /* Allow access to RTC */
+  PWR_BackupAccessCmd(ENABLE);
+
+/* LSI used as RTC source clock */
+/* The RTC Clock may varies due to LSI frequency dispersion. */   
+  /* Enable the LSI OSC */ 
+  //RCC_LSICmd(ENABLE);
+  RCC_LSEConfig(RCC_LSE_ON);
+  /* Wait till LSI is ready */  
+  while(RCC_GetFlagStatus(RCC_FLAG_LSERDY) == RESET)//RCC_FLAG_LSERDY //RCC_FLAG_LSIRDY
+  {
+  }
+
+  /* Select the RTC Clock Source */
+  RCC_RTCCLKConfig(RCC_RTCCLKSource_LSE);//RCC_RTCCLKSource_LSE //RCC_RTCCLKSource_LSI
+   
+  /* Enable the RTC Clock */
+  RCC_RTCCLKCmd(ENABLE);
+
+  /* Wait for RTC APB registers synchronisation */
+  RTC_WaitForSynchro();
+
+  /* Calendar Configuration */
+  RTC_InitStructure.RTC_AsynchPrediv = 0x7f;
+  RTC_InitStructure.RTC_SynchPrediv	=  0xff; /* (40KHz / 100) - 1 = 399*/
+  RTC_InitStructure.RTC_HourFormat = RTC_HourFormat_24;
+  RTC_Init(&RTC_InitStructure);  
+
+  /* EXTI configuration *******************************************************/
+  EXTI_ClearITPendingBit(EXTI_Line17);
+  EXTI_InitStructure.EXTI_Line = EXTI_Line17;
+  EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
+  EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising;
+  EXTI_InitStructure.EXTI_LineCmd = ENABLE;
+  EXTI_Init(&EXTI_InitStructure);
+  
+  /* Enable the RTC Wakeup Interrupt */
+  NVIC_InitStructure.NVIC_IRQChannel = RTC_IRQn;
+  NVIC_InitStructure.NVIC_IRQChannelPriority = 0;
+  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+  NVIC_Init(&NVIC_InitStructure);
+  
+    /* Set the alarm X+5s */
+  RTC_AlarmStructure.RTC_AlarmTime.RTC_H12     = RTC_H12_AM;
+  RTC_AlarmStructure.RTC_AlarmTime.RTC_Hours   = 0x00;
+  RTC_AlarmStructure.RTC_AlarmTime.RTC_Minutes = 0x00;
+  RTC_AlarmStructure.RTC_AlarmTime.RTC_Seconds = 0x01;
+  RTC_AlarmStructure.RTC_AlarmDateWeekDay = 0x31;
+  RTC_AlarmStructure.RTC_AlarmDateWeekDaySel = RTC_AlarmDateWeekDaySel_Date;
+  RTC_AlarmStructure.RTC_AlarmMask = RTC_AlarmMask_DateWeekDay;
+  RTC_SetAlarm(RTC_Format_BCD, RTC_Alarm_A, &RTC_AlarmStructure);
+
+  RTC_ITConfig(RTC_IT_ALRA, ENABLE);
+    
+  /* Enable the alarm */
+  RTC_AlarmCmd(RTC_Alarm_A, ENABLE);
+  
+  /* Set the time to 00h 00mn 00s AM */
+  //RTC_TimeStructure.RTC_H12     = RTC_H12_AM;
+  //RTC_TimeStructure.RTC_Hours   = 0x00;
+  //RTC_TimeStructure.RTC_Minutes = 0x00;
+  //RTC_TimeStructure.RTC_Seconds = 0x00;  
+  
+  //RTC_SetTime(RTC_Format_BCD, &RTC_TimeStructure);
+  PWR_BackupAccessCmd(DISABLE);
+}
+void RTC_IRQHandler(void)
+{
+  /*
+  if(RTC_GetITStatus(RTC_IT_ALRA) != RESET)
+  {
+    RTC_TimeTypeDef RTC_TimeStructure;
+    
+    RTC_TimeStructure.RTC_H12     = RTC_H12_AM;
+    RTC_TimeStructure.RTC_Hours   = 0x00;
+    RTC_TimeStructure.RTC_Minutes = 0x00;
+    RTC_TimeStructure.RTC_Seconds = 0x00;  
+  
+    RTC_SetTime(RTC_Format_BCD, &RTC_TimeStructure);
+    
+    RTC_ClearITPendingBit(RTC_IT_ALRA);
+    EXTI_ClearITPendingBit(EXTI_Line17);
+  } */
 }
