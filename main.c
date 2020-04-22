@@ -1171,3 +1171,235 @@ void RTC_IRQHandler(void)
     EXTI_ClearITPendingBit(EXTI_Line17);
   } */
 }
+
+void ft812_serviceMenu(void){
+  FT8_start_cmd_burst();
+  FT8_cmd_dl(CMD_DLSTART);
+  FT8_cmd_dl(DL_CLEAR_RGB | 0x000000);
+  FT8_cmd_dl(DL_CLEAR | CLR_COL | CLR_STN | CLR_TAG);
+
+  FT8_cmd_dl(DL_COLOR_RGB | GREY_COLOR);
+  uint8_t offset = 20;
+
+  FT8_cmd_dl(DL_COLOR_RGB | 0xeb9123);
+  ft_custom_font_edit("Меню Сервисного режима"); FT8_cmd_text(10,5, 11, 0, outstring);
+  FT8_cmd_line(0,25,319,25,3);
+  FT8_cmd_dl(DL_COLOR_RGB | 0x246e37);
+  FT8_cmd_rect(0, 30, 319, 50, 1);
+  FT8_cmd_rect(0, 70, 319, 90, 1);
+  FT8_cmd_rect(0, 110, 319, 130, 1);
+  FT8_cmd_rect(0, 150, 319, 170, 1);
+  FT8_cmd_rect(0, 190, 319, 210, 1);
+  
+  FT8_cmd_dl(DL_COLOR_RGB | 0xffff00);
+  ft_custom_font_edit("1.Запуск/Стоп"); FT8_cmd_text(10,10+offset, 11, 0, outstring);
+  ft_custom_font_edit("2.Ручной режим"); FT8_cmd_text(10,30+offset, 11, 0, outstring);
+  ft_custom_font_edit("3.Шнек подачи"); FT8_cmd_text(10,50+offset, 11, 0, outstring);
+  ft_custom_font_edit("4.Вентилятор"); FT8_cmd_text(10,70+offset, 11, 0, outstring);  
+  ft_custom_font_edit("5.Температура"); FT8_cmd_text(10,90+offset, 11, 0, outstring); 
+  ft_custom_font_edit("6.Настройки"); FT8_cmd_text(10,110+offset, 11, 0, outstring); 
+  ft_custom_font_edit("7.Заполнить бункер"); FT8_cmd_text(10,130+offset, 11, 0, outstring); 
+
+  FT8_cmd_dl(DL_DISPLAY);
+  FT8_cmd_dl(CMD_SWAP);
+  FT8_end_cmd_burst(); /* stop writing to the cmd-fifo */
+  FtCmdStart();    
+}
+void ft812_serviceL2(void){
+  FT8_start_cmd_burst();
+  FT8_cmd_dl(CMD_DLSTART);
+  FT8_cmd_dl(DL_CLEAR_RGB | 0x000000);
+  FT8_cmd_dl(DL_CLEAR | CLR_COL | CLR_STN | CLR_TAG);
+
+  FT8_cmd_dl(DL_COLOR_RGB | GREY_COLOR);
+  uint8_t offset = 20;
+
+  FT8_cmd_dl(DL_COLOR_RGB | 0xeb9123);
+  ft_custom_font_edit("Ручной режим"); FT8_cmd_text(10,5, 11, 0, outstring);
+  FT8_cmd_line(0,25,319,25,3);
+  FT8_cmd_dl(DL_COLOR_RGB | 0x246e37);
+  FT8_cmd_rect(0, 30, 319, 50, 1);
+  FT8_cmd_rect(0, 70, 319, 90, 1);
+  FT8_cmd_rect(0, 110, 319, 130, 1);
+  FT8_cmd_rect(0, 150, 319, 170, 1);
+  FT8_cmd_rect(0, 190, 319, 210, 1);
+  
+  FT8_cmd_dl(DL_COLOR_RGB | 0xffff00);
+  ft_custom_font_edit("1.Шнек вкл/выкл"); FT8_cmd_text(10,10+offset, 11, 0, outstring);
+  ft_custom_font_edit("2.Насос ЦО(вкл/выкл)"); FT8_cmd_text(10,30+offset, 11, 0, outstring);
+  ft_custom_font_edit("3.Насос ГВС(вкл/выкл)"); FT8_cmd_text(10,50+offset, 11, 0, outstring);
+  ft_custom_font_edit("4.Вентилятор(вкл/выкл)"); FT8_cmd_text(10,70+offset, 11, 0, outstring);  
+  ft_custom_font_edit("5.Реверс (вкл/выкл)"); FT8_cmd_text(10,90+offset, 11, 0, outstring); 
+
+  FT8_cmd_dl(DL_DISPLAY);
+  FT8_cmd_dl(CMD_SWAP);
+  FT8_end_cmd_burst(); /* stop writing to the cmd-fifo */
+  FtCmdStart();    
+}
+void ft812_serviceL3(void){
+  FT8_start_cmd_burst();
+  FT8_cmd_dl(CMD_DLSTART);
+  FT8_cmd_dl(DL_CLEAR_RGB | 0x000000);
+  FT8_cmd_dl(DL_CLEAR | CLR_COL | CLR_STN | CLR_TAG);
+
+  FT8_cmd_dl(DL_COLOR_RGB | GREY_COLOR);
+  uint8_t offset = 20;
+
+  FT8_cmd_dl(DL_COLOR_RGB | 0xeb9123);
+  ft_custom_font_edit("Шнек подачи"); FT8_cmd_text(10,5, 11, 0, outstring);
+  FT8_cmd_line(0,25,319,25,3);
+  FT8_cmd_dl(DL_COLOR_RGB | 0x246e37);
+  FT8_cmd_rect(0, 30, 319, 50, 1);
+  FT8_cmd_rect(0, 70, 319, 90, 1);
+  FT8_cmd_rect(0, 110, 319, 130, 1);
+  FT8_cmd_rect(0, 150, 319, 170, 1);
+  FT8_cmd_rect(0, 190, 319, 210, 1);
+  
+  FT8_cmd_dl(DL_COLOR_RGB | 0xffff00);
+  ft_custom_font_edit("1.Нагрев:"); FT8_cmd_text(10,10+offset, 11, 0, outstring);
+  ft_custom_font_edit("1.1.Работа(сек)"); FT8_cmd_text(10,30+offset, 11, 0, outstring);
+  ft_custom_font_edit("1.2.Перерыв(сек)"); FT8_cmd_text(10,50+offset, 11, 0, outstring);
+  ft_custom_font_edit("2.Поддержка(доп):"); FT8_cmd_text(10,70+offset, 11, 0, outstring);  
+  ft_custom_font_edit("2.1.Работа(сек)"); FT8_cmd_text(10,90+offset, 11, 0, outstring); 
+  ft_custom_font_edit("2.2.Перерыв(мин)"); FT8_cmd_text(10,110+offset, 11, 0, outstring); 
+
+  FT8_cmd_dl(DL_DISPLAY);
+  FT8_cmd_dl(CMD_SWAP);
+  FT8_end_cmd_burst(); /* stop writing to the cmd-fifo */
+  FtCmdStart();    
+}
+void ft812_serviceL4(void){
+  FT8_start_cmd_burst();
+  FT8_cmd_dl(CMD_DLSTART);
+  FT8_cmd_dl(DL_CLEAR_RGB | 0x000000);
+  FT8_cmd_dl(DL_CLEAR | CLR_COL | CLR_STN | CLR_TAG);
+
+  FT8_cmd_dl(DL_COLOR_RGB | GREY_COLOR);
+  uint8_t offset = 20;
+
+  FT8_cmd_dl(DL_COLOR_RGB | 0xeb9123);
+  ft_custom_font_edit("Вентилятор"); FT8_cmd_text(10,5, 11, 0, outstring);
+  FT8_cmd_line(0,25,319,25,3);
+  FT8_cmd_dl(DL_COLOR_RGB | 0x246e37);
+  FT8_cmd_rect(0, 30, 319, 50, 1);
+  FT8_cmd_rect(0, 70, 319, 90, 1);
+  FT8_cmd_rect(0, 110, 319, 130, 1);
+  FT8_cmd_rect(0, 150, 319, 170, 1);
+  FT8_cmd_rect(0, 190, 319, 210, 1);
+  
+  FT8_cmd_dl(DL_COLOR_RGB | 0xffff00);
+  ft_custom_font_edit("1.Поддержка"); FT8_cmd_text(10,10+offset, 11, 0, outstring);
+  ft_custom_font_edit("1.1.Работа(сек)"); FT8_cmd_text(10,30+offset, 11, 0, outstring);
+  ft_custom_font_edit("1.2.Перерыв(сек)"); FT8_cmd_text(10,50+offset, 11, 0, outstring);
+  ft_custom_font_edit("2.Максимальная мощность"); FT8_cmd_text(10,70+offset, 11, 0, outstring);  
+
+  FT8_cmd_dl(DL_DISPLAY);
+  FT8_cmd_dl(CMD_SWAP);
+  FT8_end_cmd_burst(); /* stop writing to the cmd-fifo */
+  FtCmdStart();    
+}
+void ft812_serviceL5(void){
+  FT8_start_cmd_burst();
+  FT8_cmd_dl(CMD_DLSTART);
+  FT8_cmd_dl(DL_CLEAR_RGB | 0x000000);
+  FT8_cmd_dl(DL_CLEAR | CLR_COL | CLR_STN | CLR_TAG);
+
+  FT8_cmd_dl(DL_COLOR_RGB | GREY_COLOR);
+  uint8_t offset = 20;
+
+  FT8_cmd_dl(DL_COLOR_RGB | 0xeb9123);
+  ft_custom_font_edit("Температура"); FT8_cmd_text(10,5, 11, 0, outstring);
+  FT8_cmd_line(0,25,319,25,3);
+  FT8_cmd_dl(DL_COLOR_RGB | 0x246e37);
+  FT8_cmd_rect(0, 30, 319, 50, 1);
+  FT8_cmd_rect(0, 70, 319, 90, 1);
+  FT8_cmd_rect(0, 110, 319, 130, 1);
+  FT8_cmd_rect(0, 150, 319, 170, 1);
+  FT8_cmd_rect(0, 190, 319, 210, 1);
+  
+  FT8_cmd_dl(DL_COLOR_RGB | 0xffff00);
+  ft_custom_font_edit("1.Температура ЦО"); FT8_cmd_text(10,10+offset, 11, 0, outstring);
+  ft_custom_font_edit("2.Гистерезис ЦО"); FT8_cmd_text(10,30+offset, 11, 0, outstring);
+  ft_custom_font_edit("3.Температура ГВС"); FT8_cmd_text(10,50+offset, 11, 0, outstring);
+  ft_custom_font_edit("4.Гистерезис ГВС"); FT8_cmd_text(10,70+offset, 11, 0, outstring);  
+
+  FT8_cmd_dl(DL_DISPLAY);
+  FT8_cmd_dl(CMD_SWAP);
+  FT8_end_cmd_burst(); /* stop writing to the cmd-fifo */
+  FtCmdStart();    
+}
+void ft812_serviceL6(void){
+  FT8_start_cmd_burst();
+  FT8_cmd_dl(CMD_DLSTART);
+  FT8_cmd_dl(DL_CLEAR_RGB | 0x000000);
+  FT8_cmd_dl(DL_CLEAR | CLR_COL | CLR_STN | CLR_TAG);
+
+  FT8_cmd_dl(DL_COLOR_RGB | GREY_COLOR);
+  uint8_t offset = 20;
+
+  FT8_cmd_dl(DL_COLOR_RGB | 0xeb9123);
+  ft_custom_font_edit("Настройки"); FT8_cmd_text(10,5, 11, 0, outstring);
+  FT8_cmd_line(0,25,319,25,3);
+  FT8_cmd_dl(DL_COLOR_RGB | 0x246e37);
+  FT8_cmd_rect(0, 30, 319, 50, 1);
+  FT8_cmd_rect(0, 70, 319, 90, 1);
+  FT8_cmd_rect(0, 110, 319, 130, 1);
+  FT8_cmd_rect(0, 150, 319, 170, 1);
+  FT8_cmd_rect(0, 190, 319, 210, 1);
+  
+  FT8_cmd_dl(DL_COLOR_RGB | 0xffff00);
+  ft_custom_font_edit("1.GSM(вкл/выкл)"); FT8_cmd_text(10,10+offset, 11, 0, outstring);
+  ft_custom_font_edit("2.Автоконтроль"); FT8_cmd_text(10,30+offset, 11, 0, outstring);
+  ft_custom_font_edit("2.1.Коэффициент подачи"); FT8_cmd_text(10,50+offset, 11, 0, outstring);
+  ft_custom_font_edit("2.2.Коэффициент вентилятора грубый"); FT8_cmd_text(10,70+offset, 11, 0, outstring); 
+  ft_custom_font_edit("2.3.Коэффициент вентилятора точный"); FT8_cmd_text(10,90+offset, 11, 0, outstring);  
+  ft_custom_font_edit("3.Расписание"); FT8_cmd_text(10,110+offset, 11, 0, outstring);  
+  ft_custom_font_edit("3.1.Расписание ЦО"); FT8_cmd_text(10,130+offset, 11, 0, outstring);  
+  ft_custom_font_edit("3.2.Расписание ГВС"); FT8_cmd_text(10,150+offset, 11, 0, outstring);  
+  ft_custom_font_edit("4.Журнал ошибок"); FT8_cmd_text(10,170+offset, 11, 0, outstring);  
+  ft_custom_font_edit("5.Заводские настройки"); FT8_cmd_text(10,190+offset, 11, 0, outstring);  
+  ft_custom_font_edit("6.Главный экран"); FT8_cmd_text(10,210+offset, 11, 0, outstring); 
+  ft_custom_font_edit("7.Ручная топка"); FT8_cmd_text(10,230+offset, 11, 0, outstring); 
+  ft_custom_font_edit("8.Сброс ошибок"); FT8_cmd_text(10,250+offset, 11, 0, outstring); 
+  
+  FT8_cmd_dl(DL_DISPLAY);
+  FT8_cmd_dl(CMD_SWAP);
+  FT8_end_cmd_burst(); /* stop writing to the cmd-fifo */
+  FtCmdStart();    
+}
+void ft812_serviceL7(void){
+  FT8_start_cmd_burst();
+  FT8_cmd_dl(CMD_DLSTART);
+  FT8_cmd_dl(DL_CLEAR_RGB | 0x000000);
+  FT8_cmd_dl(DL_CLEAR | CLR_COL | CLR_STN | CLR_TAG);
+
+  FT8_cmd_dl(DL_COLOR_RGB | GREY_COLOR);
+  uint8_t offset = 20;
+
+  FT8_cmd_dl(DL_COLOR_RGB | 0xeb9123);
+  ft_custom_font_edit("Заполнить бункер"); FT8_cmd_text(10,5, 11, 0, outstring);
+  FT8_cmd_line(0,25,319,25,3);
+  FT8_cmd_dl(DL_COLOR_RGB | 0x246e37);
+  FT8_cmd_rect(0, 30, 319, 50, 1);
+  FT8_cmd_rect(0, 70, 319, 90, 1);
+  FT8_cmd_rect(0, 110, 319, 130, 1);
+  FT8_cmd_rect(0, 150, 319, 170, 1);
+  FT8_cmd_rect(0, 190, 319, 210, 1);
+  
+  FT8_cmd_dl(DL_COLOR_RGB | 0xffff00);
+  ft_custom_font_edit("1.Заполнить 100%"); FT8_cmd_text(10,10+offset, 11, 0, outstring);
+  ft_custom_font_edit("2.Пустой 0%"); FT8_cmd_text(10,30+offset, 11, 0, outstring);
+  
+  FT8_cmd_dl(DL_DISPLAY);
+  FT8_cmd_dl(CMD_SWAP);
+  FT8_end_cmd_burst(); /* stop writing to the cmd-fifo */
+  FtCmdStart();    
+}
+
+uint8_t setCurrentLimit(uint16_t current){
+  uint16_t tCurrent = current;
+  if(tCurrent > 5000)tCurrent = 5000;
+  termStruct.screwCurrentLimit = tCurrent;
+  
+  return 0;
+}
