@@ -30,6 +30,18 @@ void ft812_acceptWindowCustom(void);
 void RTC_Update(RTC_struct volatile *value);
 void rtc_init(void);
 void RTC_Config(void);
+
+
+void ft812_userMenu(uint8_t paramMenu);
+void ft812_userL1(uint8_t paramMenu);
+void ft812_userL2(uint8_t paramMenu);
+void ft812_userL3(uint8_t paramMenu);
+void ft812_userL4(uint8_t paramMenu);
+void ft812_userL5(uint8_t paramMenu);
+void ft812_userL6(uint8_t paramMenu);
+void ft812_userL7(uint8_t paramMenu);
+
+
 GPIO_InitTypeDef GPIO_InitStructure;
 ADC_InitTypeDef ADC__InitStructure;
 DMA_InitTypeDef DMA__InitStructure;
@@ -68,16 +80,30 @@ uint16_t piezoShortTimerCnt = 0, piezoShortCnt = 0;
 //menu variables
 uint8_t menuLevel = 0;//0 - MainMenu, 1 - SettingsMenu, 2 - ParametersMenu, 3 - AcceptMenu
 uint16_t displayRefreshTime = 0;
+uint8_t userMenuLevelPosition = 0, paramMenuLevelPosition = 0;
+uint8_t tempParamfromInnerMenu = 0;
+uint8_t tempScrewState = 0, tempPumpCOState = 0, tempPumpGVSState = 0, tempFanState = 0, tempScrewReversState = 0;
+uint8_t userMenuListLen[7] = {1, 5, 4, 3, 4, 8, 2};
+uint8_t tempScrewRunWorkTime = 1, tempScrewRunSleepTime = 10;
+uint8_t tempScrewSupportWorkTime = 1, tempScrewSupportSleepTime = 10;
+uint8_t tempFanSupportWorkTime = 1, tempFanSupportSleepTime = 10;
+uint8_t tempFanPower = 0;
 
 //создаем экземпляр этого типа
 volatile RTC_struct rtc;
 struct termC_Struct{
+    uint8_t termStartStop;
     uint8_t termRegime;//режим работы котла - ручной/авто
     uint8_t screwRegime;//работа шнека ручной/авто
+    uint8_t screwState;
+    uint8_t pumpCOState;
+    uint8_t pumpGVSState;
+    uint8_t screwReversState;
     uint8_t screwSpeed;//скорость работы шнека not used
     //uint8_t screwState;
     uint16_t screwCurrentLimit;//ток заклинивания шнека mA
     uint8_t fanState;//работа вентилятора
+    uint8_t fanPower;
     uint8_t fanSpeed;//скорость работы вентилятора
     uint8_t tempCO_settled;//ЦО установленная температура
     uint8_t tempCO_current;//ЦО текущая температура
@@ -89,9 +115,18 @@ struct termC_Struct{
     uint8_t tempBunker;
     uint8_t tempScrew;
     uint8_t termTermostate;// two states 0 and 1
+    uint16_t screwRunWorkTime;
+    uint16_t screwRunSleepTime;
+    uint16_t screwSupportWorkTime;
+    uint16_t screwSupportSleepTime;
+    uint16_t fanSupportWorkTime;
+    uint16_t fanSupportSleepTime;
     
 
 }termStruct;
+
+
+
 void fan_control(uint8_t fanSpeed){
   
   //
@@ -173,7 +208,7 @@ int main(){
   ft812_custom_font_init();
   ft812_mainWindowCustom();
   //ft812_paramWindowCustom();
-  
+  termStruct.termStartStop = 0;
   termStruct.termRegime = MANUAL;
   termStruct.screwRegime = MANUAL;
   termStruct.screwCurrentLimit = 3000;//3A
@@ -186,6 +221,18 @@ int main(){
   termStruct.tempControlMode = 0;
   termStruct.tempControlState = 0;
   termStruct.tempScrew = 0;
+  termStruct.screwState = 0;
+  termStruct.pumpCOState = 0;
+  termStruct.pumpGVSState = 0;
+  termStruct.fanState = 0;
+  termStruct.screwReversState = 0; 
+  termStruct.screwRunSleepTime = 10;
+  termStruct.screwRunWorkTime = 5;
+  termStruct.screwSupportSleepTime = 60;
+  termStruct.screwSupportWorkTime = 5;
+  termStruct.fanSupportSleepTime = 60;
+  termStruct.fanSupportWorkTime = 10;
+  termStruct.fanPower = 0;
   
   while(1){
     temp_actualGVSLevel_value[0] = adc_ch_array[5];
@@ -225,16 +272,40 @@ int main(){
     if(menuLevel == MENU_LEVEL_SETTINGS){
       if(displayRefreshTime == 0){
         displayRefreshTime = 200;
-        ft812_settingsWindowCustom();
+        ft812_userMenu(userMenuLevelPosition);
       }      
       if(btnPlusShortPressEventCnt != 0){
+        
+        userMenuLevelPosition += 1;
+        if(userMenuLevelPosition >= 7) userMenuLevelPosition = 0;
         btnPlusShortPressEventCnt = 0;
       }      
       if(btnMinusShortPressEventCnt != 0){
+        if(userMenuLevelPosition != 0)userMenuLevelPosition -= 1;
+        else userMenuLevelPosition = 6;        
         btnMinusShortPressEventCnt = 0;
       }      
       if(btnAcceptShortPressEventCnt != 0){
         menuLevel = MENU_LEVEL_PARAMETERS;
+        paramMenuLevelPosition = 0;
+        if(userMenuLevelPosition == 0)tempParamfromInnerMenu = termStruct.termStartStop;
+        if(userMenuLevelPosition == 1){//manual mode, stop auto
+          termStruct.termStartStop = 0;
+          
+        }
+        if(userMenuLevelPosition == 2){
+          tempScrewRunSleepTime = termStruct.screwRunSleepTime;
+          tempScrewRunWorkTime = termStruct.screwRunWorkTime;
+          tempScrewSupportSleepTime = termStruct.screwSupportSleepTime;
+          tempScrewSupportWorkTime = termStruct.screwSupportWorkTime;
+
+        }
+        if(userMenuLevelPosition == 3){
+          tempFanSupportSleepTime = termStruct.fanSupportSleepTime;
+          tempFanSupportWorkTime = termStruct.fanSupportWorkTime;
+          tempFanPower = termStruct.fanPower;
+          
+        }
         btnAcceptShortPressEventCnt = 0;
       }      
       if(btnCancelShortPressEventCnt != 0){
@@ -246,15 +317,39 @@ int main(){
     if(menuLevel == MENU_LEVEL_PARAMETERS){
       if(displayRefreshTime == 0){
         displayRefreshTime = 200;
-        ft812_paramWindowCustom();
+        if(userMenuLevelPosition == 0) ft812_userL1(tempParamfromInnerMenu);
+        if(userMenuLevelPosition == 1) ft812_userL2(paramMenuLevelPosition);
+        if(userMenuLevelPosition == 2) ft812_userL3(paramMenuLevelPosition);
+        if(userMenuLevelPosition == 3) ft812_userL4(paramMenuLevelPosition);
+        if(userMenuLevelPosition == 4) ft812_userL5(paramMenuLevelPosition);
+        if(userMenuLevelPosition == 5) ft812_userL6(paramMenuLevelPosition);
+        if(userMenuLevelPosition == 6) ft812_userL7(paramMenuLevelPosition);
       }         
       if(btnPlusShortPressEventCnt != 0){
+        if(userMenuLevelPosition == 0){
+          if(tempParamfromInnerMenu == 0)tempParamfromInnerMenu = 1;
+          else tempParamfromInnerMenu = 0;
+        }
+        paramMenuLevelPosition += 1;
+        if(paramMenuLevelPosition >= userMenuListLen[userMenuLevelPosition])paramMenuLevelPosition = 0;
+        
+        
         btnPlusShortPressEventCnt = 0;
       }      
       if(btnMinusShortPressEventCnt != 0){
+        if(userMenuLevelPosition == 0){
+          if(tempParamfromInnerMenu == 0)tempParamfromInnerMenu = 1;
+          else tempParamfromInnerMenu = 0;
+        }
+        
+        if(paramMenuLevelPosition != 0)paramMenuLevelPosition -= 1;
+        else paramMenuLevelPosition = userMenuListLen[userMenuLevelPosition]-1;
         btnMinusShortPressEventCnt = 0;
       }
       if(btnAcceptShortPressEventCnt != 0){
+        if(userMenuLevelPosition == 0){
+          termStruct.termStartStop = tempParamfromInnerMenu;
+        }
         menuLevel = MENU_LEVEL_ACCEPT;
         btnAcceptShortPressEventCnt = 0;
       }      
@@ -578,66 +673,7 @@ void TIM2_IRQHandler(void){
       PIEZO_LOW;
     }
     
-   
-    
-/*    
-uint16_t btnPlusCnt = 0, btnMinusCnt = 0, btnAcceptCnt = 0, btnCancelCnt = 0;
-uint8_t btnPlusState = 0, btnMinusState = 0, btnAcceptState = 0, btnCancelState = 0;
-uint8_t btnPlusPreState = 0, btnMinusPreState = 0, btnAcceptPreState = 0, btnCancelPreState = 0;
-uint8_t btnPlusShortPressEventCnt = 0, btnMinusShortPressEventCnt = 0, btnAcceptShortPressEventCnt = 0, btnCancelShortPressEventCnt = 0;
-uint16_t btnPlusLongPressTimeCnt = 0, btnMinusLongPressTimeCnt = 0, btnAcceptLongPressTimeCnt = 0, btnCancelLongPressTimeCnt = 0;
-uint8_t btnPlusLongPressEvent = 0, btnMinusLongPressEvent = 0, btnAcceptLongPressEvent = 0, btnCancelLongPressEvent = 0;
-*/
-/*
-  if(display_refresh_cnt != 0){
-    display_tag = FtGetTouchTag();
-    tag_x = (uint16_t)(display_tag & 0x0000ffff);
-    tag_y = (uint16_t)(display_tag>>16);   
-    //button_delay_cnt = 100;    
-  }  
-  button_response_cnt++;
-  if((tag_x != 8000)&&(tag_y != 8000)&&(menu_change_button_timeout == 0)){
-    if(display_menu_level == SET_IP_ADDRESS_MENU){
-      if(((tag_x<=col_0)&&(tag_x>=col_1))&&((tag_y<=row_0)&&(tag_y>=row_1)))button_1_press_cnt++;
-      if(((tag_x<=col_0)&&(tag_x>=col_1))&&((tag_y<=row_2)&&(tag_y>=row_3)))button_2_press_cnt++;
-      if(((tag_x<=col_0)&&(tag_x>=col_1))&&((tag_y<=row_4)&&(tag_y>=row_5)))button_3_press_cnt++;
       
-      if(((tag_x<=col_2)&&(tag_x>=col_3))&&((tag_y<=row_0)&&(tag_y>=row_1)))button_4_press_cnt++;
-      if(((tag_x<=col_2)&&(tag_x>=col_3))&&((tag_y<=row_2)&&(tag_y>=row_3)))button_5_press_cnt++;
-      if(((tag_x<=col_2)&&(tag_x>=col_3))&&((tag_y<=row_4)&&(tag_y>=row_5)))button_6_press_cnt++;
-
-      if(((tag_x<=col_4)&&(tag_x>=col_5))&&((tag_y<=row_0)&&(tag_y>=row_1)))button_7_press_cnt++;
-      if(((tag_x<=col_4)&&(tag_x>=col_5))&&((tag_y<=row_2)&&(tag_y>=row_3)))button_8_press_cnt++;
-      if(((tag_x<=col_4)&&(tag_x>=col_5))&&((tag_y<=row_4)&&(tag_y>=row_5)))button_9_press_cnt++;
-
-      if(((tag_x<=col_6)&&(tag_x>=col_7))&&((tag_y<=row_0)&&(tag_y>=row_1)))button_ok_press_cnt++;
-      if(((tag_x<=col_6)&&(tag_x>=col_7))&&((tag_y<=row_2)&&(tag_y>=row_3)))button_0_press_cnt++;
-      if(((tag_x<=col_6)&&(tag_x>=col_7))&&((tag_y<=row_4)&&(tag_y>=row_5)))button_cancel_press_cnt++;            
-    }
-    if(display_menu_level == MAIN_MENU){
-      if(((tag_x>=800)&&(tag_x<=900))&&((tag_y>=590)&&(tag_y<=755)))main_menu_fan_button_press_cnt++;
-      if(((tag_x>=800)&&(tag_x<=900))&&((tag_y>=780)&&(tag_y<=950)))main_menu_lan_button_press_cnt++;
-    }
-    if(display_menu_level == COMMUNICATION_MENU){
-      if(((tag_x>=800)&&(tag_x<=910))&&((tag_y>=60)&&(tag_y<=220))&&(_menu_param_changed == 1))lan_menu_apply_button_press_cnt++;
-      if(((tag_x>=800)&&(tag_x<=910))&&((tag_y>=780)&&(tag_y<=950)))lan_menu_exit_button_press_cnt++;
-      
-      if(((tag_x>=620)&&(tag_x<=750))&&((tag_y>=385)&&(tag_y<=900)))lan_menu_ip_button_cnt++;
-      if(((tag_x>=430)&&(tag_x<=560))&&((tag_y>=385)&&(tag_y<=900)))lan_menu_subnet_button_cnt++;
-      if(((tag_x>=250)&&(tag_x<=380))&&((tag_y>=385)&&(tag_y<=900)))lan_menu_ipg_button_cnt++;
-      
-    }
-    
-    if(display_menu_level == FAN_MENU){
-      if(((tag_x>=500)&&(tag_x<650))&&((tag_y>=490)&&(tag_y<610)))button_minus_press_cnt++;
-      if(((tag_x>=500)&&(tag_x<650))&&((tag_y>=820)&&(tag_y<930)))button_plus_press_cnt++;
-      
-      //if((((tag_x>=800))&&(tag_y<200))&&(_menu_param_changed == 1))button_apply_press_cnt++; 
-      if(((tag_x>=800)&&(tag_x<=910))&&((tag_y>=60)&&(tag_y<=220))&&(_menu_param_changed == 1))fan_menu_apply_button_press_cnt++;
-      if(((tag_x>=800)&&(tag_x<=910))&&((tag_y>=780)&&(tag_y<=950)))fan_menu_exit_button_press_cnt++;
-    }
-  }
-*/    
     
     TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
 
@@ -1172,7 +1208,7 @@ void RTC_IRQHandler(void)
   } */
 }
 
-void ft812_serviceMenu(void){
+void ft812_userMenu(uint8_t paramMenu){
   FT8_start_cmd_burst();
   FT8_cmd_dl(CMD_DLSTART);
   FT8_cmd_dl(DL_CLEAR_RGB | 0x000000);
@@ -1182,16 +1218,27 @@ void ft812_serviceMenu(void){
   uint8_t offset = 20;
 
   FT8_cmd_dl(DL_COLOR_RGB | 0xeb9123);
-  ft_custom_font_edit("Меню Сервисного режима"); FT8_cmd_text(10,5, 11, 0, outstring);
+  ft_custom_font_edit("Основное меню"); FT8_cmd_text(10,5, 11, 0, outstring);
   FT8_cmd_line(0,25,319,25,3);
+  
   FT8_cmd_dl(DL_COLOR_RGB | 0x246e37);
-  FT8_cmd_rect(0, 30, 319, 50, 1);
-  FT8_cmd_rect(0, 70, 319, 90, 1);
-  FT8_cmd_rect(0, 110, 319, 130, 1);
-  FT8_cmd_rect(0, 150, 319, 170, 1);
-  FT8_cmd_rect(0, 190, 319, 210, 1);
+  if(paramMenu == 0)FT8_cmd_rect(0, 30, 319, 50, 1);
+  if(paramMenu == 1)FT8_cmd_rect(0, 50, 319, 70, 1);
+  if(paramMenu == 2)FT8_cmd_rect(0, 70, 319, 90, 1);
+  if(paramMenu == 3)FT8_cmd_rect(0, 90, 319, 110, 1);
+  if(paramMenu == 4)FT8_cmd_rect(0, 110, 319, 130, 1);
+  if(paramMenu == 5)FT8_cmd_rect(0, 130, 319, 150, 1);
+  if(paramMenu == 6)FT8_cmd_rect(0, 150, 319, 170, 1);
   
   FT8_cmd_dl(DL_COLOR_RGB | 0xffff00);
+  
+  if(termStruct.termStartStop == 0){
+    ft_custom_font_edit("Стоп"); FT8_cmd_text(230,10+offset, 11, 0, outstring);
+  }
+  if(termStruct.termStartStop == 1){
+    ft_custom_font_edit("Запущен"); FT8_cmd_text(230,10+offset, 11, 0, outstring);
+  }  
+  
   ft_custom_font_edit("1.Запуск/Стоп"); FT8_cmd_text(10,10+offset, 11, 0, outstring);
   ft_custom_font_edit("2.Ручной режим"); FT8_cmd_text(10,30+offset, 11, 0, outstring);
   ft_custom_font_edit("3.Шнек подачи"); FT8_cmd_text(10,50+offset, 11, 0, outstring);
@@ -1205,7 +1252,44 @@ void ft812_serviceMenu(void){
   FT8_end_cmd_burst(); /* stop writing to the cmd-fifo */
   FtCmdStart();    
 }
-void ft812_serviceL2(void){
+void ft812_userL1(uint8_t paramMenu){
+  FT8_start_cmd_burst();
+  FT8_cmd_dl(CMD_DLSTART);
+  FT8_cmd_dl(DL_CLEAR_RGB | 0x000000);
+  FT8_cmd_dl(DL_CLEAR | CLR_COL | CLR_STN | CLR_TAG);
+
+  FT8_cmd_dl(DL_COLOR_RGB | GREY_COLOR);
+  uint8_t offset = 20;
+
+  FT8_cmd_dl(DL_COLOR_RGB | 0xeb9123);
+  ft_custom_font_edit("Запуск котла"); FT8_cmd_text(10,5, 11, 0, outstring);
+  FT8_cmd_line(0,25,319,25,3);
+  
+  FT8_cmd_dl(DL_COLOR_RGB | 0x246e37);
+  FT8_cmd_rect(220, 30, 319, 50, 1);
+  
+  FT8_cmd_dl(DL_COLOR_RGB | 0xffff00);
+  if(paramMenu == 0){
+    ft_custom_font_edit("Стоп"); FT8_cmd_text(230,10+offset, 11, 0, outstring);
+  }
+  if(paramMenu == 1){
+    ft_custom_font_edit("Старт"); FT8_cmd_text(230,10+offset, 11, 0, outstring);
+  }
+
+  ft_custom_font_edit("1.Запуск/Стоп"); FT8_cmd_text(10,10+offset, 11, 0, outstring);
+  ft_custom_font_edit("2.Ручной режим"); FT8_cmd_text(10,30+offset, 11, 0, outstring);
+  ft_custom_font_edit("3.Шнек подачи"); FT8_cmd_text(10,50+offset, 11, 0, outstring);
+  ft_custom_font_edit("4.Вентилятор"); FT8_cmd_text(10,70+offset, 11, 0, outstring);  
+  ft_custom_font_edit("5.Температура"); FT8_cmd_text(10,90+offset, 11, 0, outstring); 
+  ft_custom_font_edit("6.Настройки"); FT8_cmd_text(10,110+offset, 11, 0, outstring); 
+  ft_custom_font_edit("7.Заполнить бункер"); FT8_cmd_text(10,130+offset, 11, 0, outstring); 
+
+  FT8_cmd_dl(DL_DISPLAY);
+  FT8_cmd_dl(CMD_SWAP);
+  FT8_end_cmd_burst(); /* stop writing to the cmd-fifo */
+  FtCmdStart();    
+}
+void ft812_userL2(uint8_t paramMenu){
   FT8_start_cmd_burst();
   FT8_cmd_dl(CMD_DLSTART);
   FT8_cmd_dl(DL_CLEAR_RGB | 0x000000);
@@ -1217,12 +1301,14 @@ void ft812_serviceL2(void){
   FT8_cmd_dl(DL_COLOR_RGB | 0xeb9123);
   ft_custom_font_edit("Ручной режим"); FT8_cmd_text(10,5, 11, 0, outstring);
   FT8_cmd_line(0,25,319,25,3);
+
   FT8_cmd_dl(DL_COLOR_RGB | 0x246e37);
-  FT8_cmd_rect(0, 30, 319, 50, 1);
-  FT8_cmd_rect(0, 70, 319, 90, 1);
-  FT8_cmd_rect(0, 110, 319, 130, 1);
-  FT8_cmd_rect(0, 150, 319, 170, 1);
-  FT8_cmd_rect(0, 190, 319, 210, 1);
+  if(paramMenu == 0)FT8_cmd_rect(0, 30, 319, 50, 1);
+  if(paramMenu == 1)FT8_cmd_rect(0, 50, 319, 70, 1);
+  if(paramMenu == 2)FT8_cmd_rect(0, 70, 319, 90, 1);
+  if(paramMenu == 3)FT8_cmd_rect(0, 90, 319, 110, 1);
+  if(paramMenu == 4)FT8_cmd_rect(0, 110, 319, 130, 1);
+  if(paramMenu == 5)FT8_cmd_rect(0, 130, 319, 150, 1);
   
   FT8_cmd_dl(DL_COLOR_RGB | 0xffff00);
   ft_custom_font_edit("1.Шнек вкл/выкл"); FT8_cmd_text(10,10+offset, 11, 0, outstring);
@@ -1236,7 +1322,7 @@ void ft812_serviceL2(void){
   FT8_end_cmd_burst(); /* stop writing to the cmd-fifo */
   FtCmdStart();    
 }
-void ft812_serviceL3(void){
+void ft812_userL3(uint8_t paramMenu){
   FT8_start_cmd_burst();
   FT8_cmd_dl(CMD_DLSTART);
   FT8_cmd_dl(DL_CLEAR_RGB | 0x000000);
@@ -1248,27 +1334,29 @@ void ft812_serviceL3(void){
   FT8_cmd_dl(DL_COLOR_RGB | 0xeb9123);
   ft_custom_font_edit("Шнек подачи"); FT8_cmd_text(10,5, 11, 0, outstring);
   FT8_cmd_line(0,25,319,25,3);
+  
   FT8_cmd_dl(DL_COLOR_RGB | 0x246e37);
-  FT8_cmd_rect(0, 30, 319, 50, 1);
-  FT8_cmd_rect(0, 70, 319, 90, 1);
-  FT8_cmd_rect(0, 110, 319, 130, 1);
-  FT8_cmd_rect(0, 150, 319, 170, 1);
-  FT8_cmd_rect(0, 190, 319, 210, 1);
+
+  if(paramMenu == 0)FT8_cmd_rect(0, 50, 319, 70, 1);
+  if(paramMenu == 1)FT8_cmd_rect(0, 70, 319, 90, 1);
+  if(paramMenu == 2)FT8_cmd_rect(0, 110, 319, 130, 1);
+  if(paramMenu == 3)FT8_cmd_rect(0, 130, 319, 150, 1);
+
   
   FT8_cmd_dl(DL_COLOR_RGB | 0xffff00);
   ft_custom_font_edit("1.Нагрев:"); FT8_cmd_text(10,10+offset, 11, 0, outstring);
-  ft_custom_font_edit("1.1.Работа(сек)"); FT8_cmd_text(10,30+offset, 11, 0, outstring);
-  ft_custom_font_edit("1.2.Перерыв(сек)"); FT8_cmd_text(10,50+offset, 11, 0, outstring);
+  ft_custom_font_edit(" 1.1.Работа(сек)"); FT8_cmd_text(10,30+offset, 11, 0, outstring);
+  ft_custom_font_edit(" 1.2.Перерыв(сек)"); FT8_cmd_text(10,50+offset, 11, 0, outstring);
   ft_custom_font_edit("2.Поддержка(доп):"); FT8_cmd_text(10,70+offset, 11, 0, outstring);  
-  ft_custom_font_edit("2.1.Работа(сек)"); FT8_cmd_text(10,90+offset, 11, 0, outstring); 
-  ft_custom_font_edit("2.2.Перерыв(мин)"); FT8_cmd_text(10,110+offset, 11, 0, outstring); 
+  ft_custom_font_edit(" 2.1.Работа(сек)"); FT8_cmd_text(10,90+offset, 11, 0, outstring); 
+  ft_custom_font_edit(" 2.2.Перерыв(мин)"); FT8_cmd_text(10,110+offset, 11, 0, outstring); 
 
   FT8_cmd_dl(DL_DISPLAY);
   FT8_cmd_dl(CMD_SWAP);
   FT8_end_cmd_burst(); /* stop writing to the cmd-fifo */
   FtCmdStart();    
 }
-void ft812_serviceL4(void){
+void ft812_userL4(uint8_t paramMenu){
   FT8_start_cmd_burst();
   FT8_cmd_dl(CMD_DLSTART);
   FT8_cmd_dl(DL_CLEAR_RGB | 0x000000);
@@ -1281,24 +1369,23 @@ void ft812_serviceL4(void){
   ft_custom_font_edit("Вентилятор"); FT8_cmd_text(10,5, 11, 0, outstring);
   FT8_cmd_line(0,25,319,25,3);
   FT8_cmd_dl(DL_COLOR_RGB | 0x246e37);
-  FT8_cmd_rect(0, 30, 319, 50, 1);
-  FT8_cmd_rect(0, 70, 319, 90, 1);
-  FT8_cmd_rect(0, 110, 319, 130, 1);
-  FT8_cmd_rect(0, 150, 319, 170, 1);
-  FT8_cmd_rect(0, 190, 319, 210, 1);
+  if(paramMenu == 0)FT8_cmd_rect(0, 50, 319, 70, 1);
+  if(paramMenu == 1)FT8_cmd_rect(0, 70, 319, 90, 1);
+  if(paramMenu == 2)FT8_cmd_rect(0, 90, 319, 110, 1);
+
   
   FT8_cmd_dl(DL_COLOR_RGB | 0xffff00);
   ft_custom_font_edit("1.Поддержка"); FT8_cmd_text(10,10+offset, 11, 0, outstring);
-  ft_custom_font_edit("1.1.Работа(сек)"); FT8_cmd_text(10,30+offset, 11, 0, outstring);
-  ft_custom_font_edit("1.2.Перерыв(сек)"); FT8_cmd_text(10,50+offset, 11, 0, outstring);
-  ft_custom_font_edit("2.Максимальная мощность"); FT8_cmd_text(10,70+offset, 11, 0, outstring);  
+  ft_custom_font_edit(" 1.1.Работа(сек)"); FT8_cmd_text(10,30+offset, 11, 0, outstring);
+  ft_custom_font_edit(" 1.2.Перерыв(сек)"); FT8_cmd_text(10,50+offset, 11, 0, outstring);
+  ft_custom_font_edit("2.Макс. мощность"); FT8_cmd_text(10,70+offset, 11, 0, outstring);  
 
   FT8_cmd_dl(DL_DISPLAY);
   FT8_cmd_dl(CMD_SWAP);
   FT8_end_cmd_burst(); /* stop writing to the cmd-fifo */
   FtCmdStart();    
 }
-void ft812_serviceL5(void){
+void ft812_userL5(uint8_t paramMenu){
   FT8_start_cmd_burst();
   FT8_cmd_dl(CMD_DLSTART);
   FT8_cmd_dl(DL_CLEAR_RGB | 0x000000);
@@ -1311,11 +1398,11 @@ void ft812_serviceL5(void){
   ft_custom_font_edit("Температура"); FT8_cmd_text(10,5, 11, 0, outstring);
   FT8_cmd_line(0,25,319,25,3);
   FT8_cmd_dl(DL_COLOR_RGB | 0x246e37);
-  FT8_cmd_rect(0, 30, 319, 50, 1);
-  FT8_cmd_rect(0, 70, 319, 90, 1);
-  FT8_cmd_rect(0, 110, 319, 130, 1);
-  FT8_cmd_rect(0, 150, 319, 170, 1);
-  FT8_cmd_rect(0, 190, 319, 210, 1);
+  if(paramMenu == 0)FT8_cmd_rect(0, 30, 319, 50, 1);
+  if(paramMenu == 1)FT8_cmd_rect(0, 50, 319, 70, 1);
+  if(paramMenu == 2)FT8_cmd_rect(0, 70, 319, 90, 1);
+  if(paramMenu == 3)FT8_cmd_rect(0, 90, 319, 110, 1);
+
   
   FT8_cmd_dl(DL_COLOR_RGB | 0xffff00);
   ft_custom_font_edit("1.Температура ЦО"); FT8_cmd_text(10,10+offset, 11, 0, outstring);
@@ -1328,7 +1415,7 @@ void ft812_serviceL5(void){
   FT8_end_cmd_burst(); /* stop writing to the cmd-fifo */
   FtCmdStart();    
 }
-void ft812_serviceL6(void){
+void ft812_userL6(uint8_t paramMenu){
   FT8_start_cmd_burst();
   FT8_cmd_dl(CMD_DLSTART);
   FT8_cmd_dl(DL_CLEAR_RGB | 0x000000);
@@ -1341,18 +1428,25 @@ void ft812_serviceL6(void){
   ft_custom_font_edit("Настройки"); FT8_cmd_text(10,5, 11, 0, outstring);
   FT8_cmd_line(0,25,319,25,3);
   FT8_cmd_dl(DL_COLOR_RGB | 0x246e37);
-  FT8_cmd_rect(0, 30, 319, 50, 1);
-  FT8_cmd_rect(0, 70, 319, 90, 1);
-  FT8_cmd_rect(0, 110, 319, 130, 1);
-  FT8_cmd_rect(0, 150, 319, 170, 1);
-  FT8_cmd_rect(0, 190, 319, 210, 1);
+  if(paramMenu == 0)FT8_cmd_rect(0, 30, 319, 50, 1);
+  if(paramMenu == 1)FT8_cmd_rect(0, 50, 319, 70, 1);
+  if(paramMenu == 2)FT8_cmd_rect(0, 70, 319, 90, 1);
+  if(paramMenu == 3)FT8_cmd_rect(0, 90, 319, 110, 1);
+  if(paramMenu == 4)FT8_cmd_rect(0, 110, 319, 130, 1);
+  if(paramMenu == 5)FT8_cmd_rect(0, 130, 319, 150, 1);
+  if(paramMenu == 6)FT8_cmd_rect(0, 150, 319, 170, 1);
+  if(paramMenu == 7)FT8_cmd_rect(0, 170, 319, 190, 1);
+  //FT8_cmd_rect(0, 70, 319, 90, 1);
+  //FT8_cmd_rect(0, 110, 319, 130, 1);
+  //FT8_cmd_rect(0, 150, 319, 170, 1);
+  //FT8_cmd_rect(0, 190, 319, 210, 1);
   
   FT8_cmd_dl(DL_COLOR_RGB | 0xffff00);
-  ft_custom_font_edit("1.GSM(вкл/выкл)"); FT8_cmd_text(10,10+offset, 11, 0, outstring);
+  FT8_cmd_text(10,10+offset, 23, 0, "1.GSM");
   ft_custom_font_edit("2.Автоконтроль"); FT8_cmd_text(10,30+offset, 11, 0, outstring);
-  ft_custom_font_edit("2.1.Коэффициент подачи"); FT8_cmd_text(10,50+offset, 11, 0, outstring);
-  ft_custom_font_edit("2.2.Коэффициент вентилятора грубый"); FT8_cmd_text(10,70+offset, 11, 0, outstring); 
-  ft_custom_font_edit("2.3.Коэффициент вентилятора точный"); FT8_cmd_text(10,90+offset, 11, 0, outstring);  
+  ft_custom_font_edit("2.1.Коэф. подачи"); FT8_cmd_text(10,50+offset, 11, 0, outstring);
+  ft_custom_font_edit("2.2.Коэф. вентилятора грубый"); FT8_cmd_text(10,70+offset, 11, 0, outstring); 
+  ft_custom_font_edit("2.3.Коэф. вентилятора точный"); FT8_cmd_text(10,90+offset, 11, 0, outstring);  
   ft_custom_font_edit("3.Расписание"); FT8_cmd_text(10,110+offset, 11, 0, outstring);  
   ft_custom_font_edit("3.1.Расписание ЦО"); FT8_cmd_text(10,130+offset, 11, 0, outstring);  
   ft_custom_font_edit("3.2.Расписание ГВС"); FT8_cmd_text(10,150+offset, 11, 0, outstring);  
@@ -1367,7 +1461,7 @@ void ft812_serviceL6(void){
   FT8_end_cmd_burst(); /* stop writing to the cmd-fifo */
   FtCmdStart();    
 }
-void ft812_serviceL7(void){
+void ft812_userL7(uint8_t paramMenu){
   FT8_start_cmd_burst();
   FT8_cmd_dl(CMD_DLSTART);
   FT8_cmd_dl(DL_CLEAR_RGB | 0x000000);
@@ -1380,11 +1474,8 @@ void ft812_serviceL7(void){
   ft_custom_font_edit("Заполнить бункер"); FT8_cmd_text(10,5, 11, 0, outstring);
   FT8_cmd_line(0,25,319,25,3);
   FT8_cmd_dl(DL_COLOR_RGB | 0x246e37);
-  FT8_cmd_rect(0, 30, 319, 50, 1);
-  FT8_cmd_rect(0, 70, 319, 90, 1);
-  FT8_cmd_rect(0, 110, 319, 130, 1);
-  FT8_cmd_rect(0, 150, 319, 170, 1);
-  FT8_cmd_rect(0, 190, 319, 210, 1);
+  if(paramMenu == 0)FT8_cmd_rect(0, 30, 319, 50, 1);
+  if(paramMenu == 1)FT8_cmd_rect(0, 50, 319, 70, 1);
   
   FT8_cmd_dl(DL_COLOR_RGB | 0xffff00);
   ft_custom_font_edit("1.Заполнить 100%"); FT8_cmd_text(10,10+offset, 11, 0, outstring);
