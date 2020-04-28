@@ -2,7 +2,10 @@
 #include "stm32f0xx.h"
 #include "main.h"
 #include "ft812.h"
-
+#include <string.h>
+#include <stdint.h>
+#include "stdlib.h"
+#include "stdio.h"
 
 typedef struct sRTC_struct{
 		 unsigned year : 6; 
@@ -85,10 +88,16 @@ uint8_t tempParamfromInnerMenu = 0;
 uint8_t tempScrewState = 0, tempPumpCOState = 0, tempPumpGVSState = 0, tempFanState = 0, tempScrewReversState = 0;
 uint8_t userMenuListLen[7] = {1, 5, 4, 3, 4, 8, 2};
 uint8_t tempScrewRunWorkTime = 1, tempScrewRunSleepTime = 10;
-uint8_t tempScrewSupportWorkTime = 1, tempScrewSupportSleepTime = 10;
+uint16_t tempScrewSupportWorkTime = 1, tempScrewSupportSleepTime = 10;
 uint8_t tempFanSupportWorkTime = 1, tempFanSupportSleepTime = 10;
 uint8_t tempFanPower = 0;
-
+uint8_t tempBunkerState = 0;//0 - empty; 1 - 100%
+uint8_t tempScrewStateManual;
+uint8_t tempPumpCOStateManual;
+uint8_t tempPumpGVSStateManual;
+uint8_t tempFanStateManual;
+uint8_t tempScrewReversStateManual;   
+    
 //создаем экземпляр этого типа
 volatile RTC_struct rtc;
 struct termC_Struct{
@@ -121,7 +130,12 @@ struct termC_Struct{
     uint16_t screwSupportSleepTime;
     uint16_t fanSupportWorkTime;
     uint16_t fanSupportSleepTime;
-    
+    uint8_t bunkerState;
+    uint8_t screwStateManual;
+    uint8_t pumpCOStateManual;
+    uint8_t pumpGVSStateManual;
+    uint8_t fanStateManual;
+    uint8_t screwReversStateManual;    
 
 }termStruct;
 
@@ -233,6 +247,12 @@ int main(){
   termStruct.fanSupportSleepTime = 60;
   termStruct.fanSupportWorkTime = 10;
   termStruct.fanPower = 0;
+  termStruct.bunkerState = 0;//empty as default
+  termStruct.screwStateManual = 0;
+  termStruct.pumpCOStateManual = 0;
+  termStruct.pumpGVSStateManual = 0;
+  termStruct.fanStateManual = 0;
+  termStruct.screwReversStateManual = 0;
   
   while(1){
     temp_actualGVSLevel_value[0] = adc_ch_array[5];
@@ -349,8 +369,22 @@ int main(){
       if(btnAcceptShortPressEventCnt != 0){
         if(userMenuLevelPosition == 0){
           termStruct.termStartStop = tempParamfromInnerMenu;
+          menuLevel = MENU_LEVEL_SETTINGS;
         }
-        menuLevel = MENU_LEVEL_ACCEPT;
+        if(userMenuLevelPosition != 0){
+            menuLevel = MENU_LEVEL_ACCEPT;
+            tempScrewStateManual = termStruct.screwStateManual;
+            tempScrewReversStateManual = termStruct.screwReversStateManual;
+            tempFanStateManual = termStruct.fanStateManual;
+            tempPumpCOStateManual = termStruct.pumpCOStateManual;
+            tempPumpGVSStateManual = termStruct.pumpGVSStateManual;
+            
+            tempScrewRunWorkTime = termStruct.screwRunWorkTime;
+            tempScrewRunSleepTime = termStruct.screwRunSleepTime;
+            tempScrewSupportWorkTime = termStruct.screwSupportWorkTime;
+            tempScrewSupportSleepTime = termStruct.screwSupportSleepTime;
+        }
+        
         btnAcceptShortPressEventCnt = 0;
       }      
       if(btnCancelShortPressEventCnt != 0){
@@ -362,16 +396,110 @@ int main(){
     if(menuLevel == MENU_LEVEL_ACCEPT){
       if(displayRefreshTime == 0){
         displayRefreshTime = 200;
-        ft812_acceptWindowCustom();
+        //ft812_acceptWindowCustom();
+      if(userMenuLevelPosition == 1) ft812_userL2(paramMenuLevelPosition);  
+      if(userMenuLevelPosition == 2) ft812_userL3(paramMenuLevelPosition); 
+      
+      
       }         
       if(btnPlusShortPressEventCnt != 0){
         btnPlusShortPressEventCnt = 0;
+        if(userMenuLevelPosition == 1){
+            if(paramMenuLevelPosition == 0){
+              if(tempScrewStateManual == 0) tempScrewStateManual = 1;
+              else tempScrewStateManual = 0;
+            }
+            if(paramMenuLevelPosition == 1){
+              if(tempPumpCOStateManual == 0) tempPumpCOStateManual = 1;
+              else tempPumpCOStateManual = 0;
+            }
+            if(paramMenuLevelPosition == 2){
+              if(tempPumpGVSStateManual == 0) tempPumpGVSStateManual = 1;
+              else tempPumpGVSStateManual = 0;
+            }
+            if(paramMenuLevelPosition == 3){
+              if(tempFanStateManual == 0) tempFanStateManual = 1;
+              else tempFanStateManual = 0;
+            }
+            if(paramMenuLevelPosition == 4){
+              if(tempScrewReversStateManual == 0) tempScrewReversStateManual = 1;
+              else tempScrewReversStateManual = 0;
+            }            
+        }
+        if(userMenuLevelPosition == 2){
+          if(paramMenuLevelPosition == 0){
+            if(tempScrewRunWorkTime <= SCREWRUN_WORKTIME_MAX) tempScrewRunWorkTime += SCREW_INC_STEP; 
+          }
+          if(paramMenuLevelPosition == 1){
+            if(tempScrewRunSleepTime <= SCREWRUN_SLEEPTIME_MAX)tempScrewRunSleepTime += SCREW_INC_STEP;          
+          }
+          if(paramMenuLevelPosition == 2){
+            if(tempScrewSupportWorkTime <= SCREWSUPPORT_WORKTIME_MAX) tempScrewSupportWorkTime += SCREW_INC_STEP;
+          }
+          if(paramMenuLevelPosition == 3){
+            if(tempScrewSupportSleepTime <= SCREWSUPPORT_SLEEPTIME_MAX) tempScrewSupportSleepTime += SCREW_INC_STEP;
+          }
+        }
       }      
       if(btnMinusShortPressEventCnt != 0){
         btnMinusShortPressEventCnt = 0;
+        if(userMenuLevelPosition == 1){
+            if(paramMenuLevelPosition == 0){
+              if(tempScrewStateManual == 0) tempScrewStateManual = 1;
+              else tempScrewStateManual = 0;
+            }
+            if(paramMenuLevelPosition == 1){
+              if(tempPumpCOStateManual == 0) tempPumpCOStateManual = 1;
+              else tempPumpCOStateManual = 0;
+            }
+            if(paramMenuLevelPosition == 2){
+              if(tempPumpGVSStateManual == 0) tempPumpGVSStateManual = 1;
+              else tempPumpGVSStateManual = 0;
+            }
+            if(paramMenuLevelPosition == 3){
+              if(tempFanStateManual == 0) tempFanStateManual = 1;
+              else tempFanStateManual = 0;
+            }
+            if(paramMenuLevelPosition == 4){
+              if(tempScrewReversStateManual == 0) tempScrewReversStateManual = 1;
+              else tempScrewReversStateManual = 0;
+            }            
+        }
+        if(userMenuLevelPosition == 2){
+          if(paramMenuLevelPosition == 0){
+              if(tempScrewRunWorkTime >= SCREW_INC_STEP) tempScrewRunWorkTime -= SCREW_INC_STEP; //= 1, tempScrewRunSleepTime
+              else tempScrewRunWorkTime = 0;
+          }
+          if(paramMenuLevelPosition == 1){
+              if(tempScrewRunSleepTime >= SCREW_INC_STEP) tempScrewRunSleepTime -= SCREW_INC_STEP;
+              else tempScrewRunSleepTime = 0;
+          }
+          if(paramMenuLevelPosition == 2){
+            if(tempScrewSupportWorkTime >= SCREW_INC_STEP) tempScrewSupportWorkTime -= SCREW_INC_STEP;
+            else tempScrewSupportWorkTime = 0;
+          }
+          if(paramMenuLevelPosition == 3){
+            if(tempScrewSupportSleepTime >= SCREW_INC_STEP) tempScrewSupportSleepTime -= SCREW_INC_STEP;
+            else tempScrewSupportSleepTime = 0;
+          }          
+        }        
+        
       }
       if(btnAcceptShortPressEventCnt != 0){
         menuLevel = MENU_LEVEL_PARAMETERS;
+        if(userMenuLevelPosition == 1){
+            if(paramMenuLevelPosition == 0)termStruct.screwStateManual = tempScrewStateManual;
+            if(paramMenuLevelPosition == 1)termStruct.pumpCOStateManual = tempPumpCOStateManual;
+            if(paramMenuLevelPosition == 2)termStruct.pumpGVSStateManual = tempPumpGVSStateManual;
+            if(paramMenuLevelPosition == 3)termStruct.fanStateManual = tempFanStateManual;
+            if(paramMenuLevelPosition == 4)termStruct.screwReversStateManual = tempScrewReversStateManual;
+        }
+        if(userMenuLevelPosition == 2){
+            if(paramMenuLevelPosition == 0)termStruct.screwRunWorkTime = tempScrewRunWorkTime;
+            if(paramMenuLevelPosition == 1)termStruct.screwRunSleepTime = tempScrewRunSleepTime;
+            if(paramMenuLevelPosition == 2)termStruct.screwSupportWorkTime = tempScrewSupportWorkTime;
+            if(paramMenuLevelPosition == 3)termStruct.screwSupportSleepTime = tempScrewSupportSleepTime;         
+        }
         btnAcceptShortPressEventCnt = 0;
       }      
       if(btnCancelShortPressEventCnt != 0){
@@ -1238,6 +1366,12 @@ void ft812_userMenu(uint8_t paramMenu){
   if(termStruct.termStartStop == 1){
     ft_custom_font_edit("Запущен"); FT8_cmd_text(230,10+offset, 11, 0, outstring);
   }  
+  if(termStruct.bunkerState == 0){
+    FT8_cmd_text(230,130+offset, 23, 0, "0%");
+  }
+  if(termStruct.bunkerState == 1){
+    FT8_cmd_text(230,130+offset, 23, 0, "100%");
+  }
   
   ft_custom_font_edit("1.Запуск/Стоп"); FT8_cmd_text(10,10+offset, 11, 0, outstring);
   ft_custom_font_edit("2.Ручной режим"); FT8_cmd_text(10,30+offset, 11, 0, outstring);
@@ -1275,7 +1409,13 @@ void ft812_userL1(uint8_t paramMenu){
   if(paramMenu == 1){
     ft_custom_font_edit("Старт"); FT8_cmd_text(230,10+offset, 11, 0, outstring);
   }
-
+  if(termStruct.bunkerState == 0){
+    FT8_cmd_text(230,130+offset, 23, 0, "0%");
+  }
+  if(termStruct.bunkerState == 1){
+    FT8_cmd_text(230,130+offset, 23, 0, "100%");
+  }
+  
   ft_custom_font_edit("1.Запуск/Стоп"); FT8_cmd_text(10,10+offset, 11, 0, outstring);
   ft_custom_font_edit("2.Ручной режим"); FT8_cmd_text(10,30+offset, 11, 0, outstring);
   ft_custom_font_edit("3.Шнек подачи"); FT8_cmd_text(10,50+offset, 11, 0, outstring);
@@ -1283,7 +1423,7 @@ void ft812_userL1(uint8_t paramMenu){
   ft_custom_font_edit("5.Температура"); FT8_cmd_text(10,90+offset, 11, 0, outstring); 
   ft_custom_font_edit("6.Настройки"); FT8_cmd_text(10,110+offset, 11, 0, outstring); 
   ft_custom_font_edit("7.Заполнить бункер"); FT8_cmd_text(10,130+offset, 11, 0, outstring); 
-
+  
   FT8_cmd_dl(DL_DISPLAY);
   FT8_cmd_dl(CMD_SWAP);
   FT8_end_cmd_burst(); /* stop writing to the cmd-fifo */
@@ -1302,21 +1442,108 @@ void ft812_userL2(uint8_t paramMenu){
   ft_custom_font_edit("Ручной режим"); FT8_cmd_text(10,5, 11, 0, outstring);
   FT8_cmd_line(0,25,319,25,3);
 
-  FT8_cmd_dl(DL_COLOR_RGB | 0x246e37);
-  if(paramMenu == 0)FT8_cmd_rect(0, 30, 319, 50, 1);
-  if(paramMenu == 1)FT8_cmd_rect(0, 50, 319, 70, 1);
-  if(paramMenu == 2)FT8_cmd_rect(0, 70, 319, 90, 1);
-  if(paramMenu == 3)FT8_cmd_rect(0, 90, 319, 110, 1);
-  if(paramMenu == 4)FT8_cmd_rect(0, 110, 319, 130, 1);
-  if(paramMenu == 5)FT8_cmd_rect(0, 130, 319, 150, 1);
+  if(menuLevel == MENU_LEVEL_PARAMETERS){
+    FT8_cmd_dl(DL_COLOR_RGB | 0x246e37);
+    if(paramMenu == 0)FT8_cmd_rect(0, 30, 319, 50, 1);
+    if(paramMenu == 1)FT8_cmd_rect(0, 50, 319, 70, 1);
+    if(paramMenu == 2)FT8_cmd_rect(0, 70, 319, 90, 1);
+    if(paramMenu == 3)FT8_cmd_rect(0, 90, 319, 110, 1);
+    if(paramMenu == 4)FT8_cmd_rect(0, 110, 319, 130, 1);
+    if(paramMenu == 5)FT8_cmd_rect(0, 130, 319, 150, 1);   
+    FT8_cmd_dl(DL_COLOR_RGB | 0xffff00);
+    if(termStruct.screwStateManual == 0){ft_custom_font_edit("Выкл."); FT8_cmd_text(230,10+offset, 11, 0, outstring);}
+    if(termStruct.screwStateManual == 1){ft_custom_font_edit("Вкл."); FT8_cmd_text(230,10+offset, 11, 0, outstring);}
+    if(termStruct.pumpCOStateManual == 0){ft_custom_font_edit("Выкл."); FT8_cmd_text(230,30+offset, 11, 0, outstring);}
+    if(termStruct.pumpCOStateManual == 1){ft_custom_font_edit("Вкл."); FT8_cmd_text(230,30+offset, 11, 0, outstring); } 
+    if(termStruct.pumpGVSStateManual == 0){ft_custom_font_edit("Выкл."); FT8_cmd_text(230,50+offset, 11, 0, outstring);}
+    if(termStruct.pumpGVSStateManual == 1){ft_custom_font_edit("Вкл."); FT8_cmd_text(230,50+offset, 11, 0, outstring);}    
+    if(termStruct.fanStateManual == 0){ft_custom_font_edit("Выкл."); FT8_cmd_text(230,70+offset, 11, 0, outstring);}
+    if(termStruct.fanStateManual == 1){ft_custom_font_edit("Вкл."); FT8_cmd_text(230,70+offset, 11, 0, outstring);}      
+    if(termStruct.screwReversStateManual == 0){ft_custom_font_edit("Выкл."); FT8_cmd_text(230,90+offset, 11, 0, outstring);}
+    if(termStruct.screwReversStateManual == 1){ft_custom_font_edit("Вкл."); FT8_cmd_text(230,90+offset, 11, 0, outstring);}
+  }  
   
   FT8_cmd_dl(DL_COLOR_RGB | 0xffff00);
-  ft_custom_font_edit("1.Шнек вкл/выкл"); FT8_cmd_text(10,10+offset, 11, 0, outstring);
-  ft_custom_font_edit("2.Насос ЦО(вкл/выкл)"); FT8_cmd_text(10,30+offset, 11, 0, outstring);
-  ft_custom_font_edit("3.Насос ГВС(вкл/выкл)"); FT8_cmd_text(10,50+offset, 11, 0, outstring);
-  ft_custom_font_edit("4.Вентилятор(вкл/выкл)"); FT8_cmd_text(10,70+offset, 11, 0, outstring);  
-  ft_custom_font_edit("5.Реверс (вкл/выкл)"); FT8_cmd_text(10,90+offset, 11, 0, outstring); 
+  ft_custom_font_edit("1.Шнек"); FT8_cmd_text(10,10+offset, 11, 0, outstring);
+  ft_custom_font_edit("2.Насос ЦО"); FT8_cmd_text(10,30+offset, 11, 0, outstring);
+  ft_custom_font_edit("3.Насос ГВС"); FT8_cmd_text(10,50+offset, 11, 0, outstring);
+  ft_custom_font_edit("4.Вентилятор"); FT8_cmd_text(10,70+offset, 11, 0, outstring);  
+  ft_custom_font_edit("5.Реверс шнека"); FT8_cmd_text(10,90+offset, 11, 0, outstring); 
 
+ 
+  if(menuLevel == MENU_LEVEL_ACCEPT){
+    FT8_cmd_dl(DL_COLOR_RGB | 0x246e37);
+    if(paramMenu == 0)FT8_cmd_rect(220, 30, 319, 50, 1);
+    if(paramMenu == 1)FT8_cmd_rect(220, 50, 319, 70, 1);
+    if(paramMenu == 2)FT8_cmd_rect(220, 70, 319, 90, 1);
+    if(paramMenu == 3)FT8_cmd_rect(220, 90, 319, 110, 1);
+    if(paramMenu == 4)FT8_cmd_rect(220, 110, 319, 130, 1);
+    if(paramMenu == 5)FT8_cmd_rect(220, 130, 319, 150, 1); 
+    FT8_cmd_dl(DL_COLOR_RGB | 0xffff00);
+    if(paramMenu == 0){
+      if(tempScrewStateManual == 0){ft_custom_font_edit("Выкл."); FT8_cmd_text(230,10+offset, 11, 0, outstring);}
+      if(tempScrewStateManual == 1){ft_custom_font_edit("Вкл. "); FT8_cmd_text(230,10+offset, 11, 0, outstring);}
+      if(termStruct.pumpCOStateManual == 0){ft_custom_font_edit("Выкл."); FT8_cmd_text(230,30+offset, 11, 0, outstring);}
+      if(termStruct.pumpCOStateManual == 1){ft_custom_font_edit("Вкл. "); FT8_cmd_text(230,30+offset, 11, 0, outstring);} 
+      if(termStruct.pumpGVSStateManual == 0){ft_custom_font_edit("Выкл."); FT8_cmd_text(230,50+offset, 11, 0, outstring);}
+      if(termStruct.pumpGVSStateManual == 1){ft_custom_font_edit("Вкл. "); FT8_cmd_text(230,50+offset, 11, 0, outstring);}     
+      if(termStruct.fanStateManual == 0){ft_custom_font_edit("Выкл."); FT8_cmd_text(230,70+offset, 11, 0, outstring);}
+      if(termStruct.fanStateManual == 1){ft_custom_font_edit("Вкл. "); FT8_cmd_text(230,70+offset, 11, 0, outstring);}
+      if(termStruct.screwReversStateManual == 0){ft_custom_font_edit("Выкл."); FT8_cmd_text(230,90+offset, 11, 0, outstring);}
+      if(termStruct.screwReversStateManual == 1){ft_custom_font_edit("Вкл. "); FT8_cmd_text(230,90+offset, 11, 0, outstring);}      
+    }
+    if(paramMenu == 1){
+      if(termStruct.screwStateManual == 0){ft_custom_font_edit("Выкл."); FT8_cmd_text(230,10+offset, 11, 0, outstring);}
+      if(termStruct.screwStateManual == 1){ft_custom_font_edit("Вкл. "); FT8_cmd_text(230,10+offset, 11, 0, outstring);}      
+      if(tempPumpCOStateManual == 0){ft_custom_font_edit("Выкл."); FT8_cmd_text(230,30+offset, 11, 0, outstring);}
+      if(tempPumpCOStateManual == 1){ft_custom_font_edit("Вкл. "); FT8_cmd_text(230,30+offset, 11, 0, outstring);}
+      if(termStruct.pumpGVSStateManual == 0){ft_custom_font_edit("Выкл."); FT8_cmd_text(230,50+offset, 11, 0, outstring);}
+      if(termStruct.pumpGVSStateManual == 1){ft_custom_font_edit("Вкл. "); FT8_cmd_text(230,50+offset, 11, 0, outstring);}     
+      if(termStruct.fanStateManual == 0){ft_custom_font_edit("Выкл."); FT8_cmd_text(230,70+offset, 11, 0, outstring);}
+      if(termStruct.fanStateManual == 1){ft_custom_font_edit("Вкл. "); FT8_cmd_text(230,70+offset, 11, 0, outstring);}  
+      if(termStruct.screwReversStateManual == 0){ft_custom_font_edit("Выкл."); FT8_cmd_text(230,90+offset, 11, 0, outstring);}
+      if(termStruct.screwReversStateManual == 1){ft_custom_font_edit("Вкл. "); FT8_cmd_text(230,90+offset, 11, 0, outstring);}        
+    }
+    if(paramMenu == 2){
+      if(termStruct.screwStateManual == 0){ft_custom_font_edit("Выкл."); FT8_cmd_text(230,10+offset, 11, 0, outstring);}
+      if(termStruct.screwStateManual == 1){ft_custom_font_edit("Вкл. "); FT8_cmd_text(230,10+offset, 11, 0, outstring);}      
+      if(termStruct.pumpCOStateManual == 0){ft_custom_font_edit("Выкл."); FT8_cmd_text(230,30+offset, 11, 0, outstring);}
+      if(termStruct.pumpCOStateManual == 1){ft_custom_font_edit("Вкл. "); FT8_cmd_text(230,30+offset, 11, 0, outstring);}      
+      if(tempPumpGVSStateManual == 0){ft_custom_font_edit("Выкл."); FT8_cmd_text(230,50+offset, 11, 0, outstring);}
+      if(tempPumpGVSStateManual == 1){ft_custom_font_edit("Вкл. "); FT8_cmd_text(230,50+offset, 11, 0, outstring);}
+      if(termStruct.fanStateManual == 0){ft_custom_font_edit("Выкл."); FT8_cmd_text(230,70+offset, 11, 0, outstring);}
+      if(termStruct.fanStateManual == 1){ft_custom_font_edit("Вкл. "); FT8_cmd_text(230,70+offset, 11, 0, outstring);}  
+      if(termStruct.screwReversStateManual == 0){ft_custom_font_edit("Выкл."); FT8_cmd_text(230,90+offset, 11, 0, outstring);}
+      if(termStruct.screwReversStateManual == 1){ft_custom_font_edit("Вкл. "); FT8_cmd_text(230,90+offset, 11, 0, outstring);}          
+    }
+    if(paramMenu == 3){
+      if(termStruct.screwStateManual == 0){ft_custom_font_edit("Выкл."); FT8_cmd_text(230,10+offset, 11, 0, outstring);}
+      if(termStruct.screwStateManual == 1){ft_custom_font_edit("Вкл. "); FT8_cmd_text(230,10+offset, 11, 0, outstring);}
+      if(termStruct.pumpCOStateManual == 0){ft_custom_font_edit("Выкл."); FT8_cmd_text(230,30+offset, 11, 0, outstring);}
+      if(termStruct.pumpCOStateManual == 1){ft_custom_font_edit("Вкл. "); FT8_cmd_text(230,30+offset, 11, 0, outstring);}  
+      if(termStruct.pumpGVSStateManual == 0){ft_custom_font_edit("Выкл."); FT8_cmd_text(230,50+offset, 11, 0, outstring);}
+      if(termStruct.pumpGVSStateManual == 1){ft_custom_font_edit("Вкл. "); FT8_cmd_text(230,50+offset, 11, 0, outstring);}        
+      if(tempFanStateManual == 0){ft_custom_font_edit("Выкл."); FT8_cmd_text(230,70+offset, 11, 0, outstring);}
+      if(tempFanStateManual == 1){ft_custom_font_edit("Вкл. "); FT8_cmd_text(230,70+offset, 11, 0, outstring);}
+      if(termStruct.screwReversStateManual == 0){ft_custom_font_edit("Выкл."); FT8_cmd_text(230,90+offset, 11, 0, outstring);}
+      if(termStruct.screwReversStateManual == 1){ft_custom_font_edit("Вкл. "); FT8_cmd_text(230,90+offset, 11, 0, outstring);}        
+    }
+    if(paramMenu == 4){
+      if(termStruct.screwStateManual == 0){ft_custom_font_edit("Выкл."); FT8_cmd_text(230,10+offset, 11, 0, outstring);}
+      if(termStruct.screwStateManual == 1){ft_custom_font_edit("Вкл. "); FT8_cmd_text(230,10+offset, 11, 0, outstring);}
+      if(termStruct.pumpCOStateManual == 0){ft_custom_font_edit("Выкл."); FT8_cmd_text(230,30+offset, 11, 0, outstring);}
+      if(termStruct.pumpCOStateManual == 1){ft_custom_font_edit("Вкл. "); FT8_cmd_text(230,30+offset, 11, 0, outstring);}  
+      if(termStruct.pumpGVSStateManual == 0){ft_custom_font_edit("Выкл."); FT8_cmd_text(230,50+offset, 11, 0, outstring);}
+      if(termStruct.pumpGVSStateManual == 1){ft_custom_font_edit("Вкл. "); FT8_cmd_text(230,50+offset, 11, 0, outstring);}     
+      if(termStruct.fanStateManual == 0){ft_custom_font_edit("Выкл."); FT8_cmd_text(230,70+offset, 11, 0, outstring);}
+      if(termStruct.fanStateManual == 1){ft_custom_font_edit("Вкл. "); FT8_cmd_text(230,70+offset, 11, 0, outstring);}        
+      if(tempScrewReversStateManual == 0){ft_custom_font_edit("Выкл."); FT8_cmd_text(230,90+offset, 11, 0, outstring);}
+      if(tempScrewReversStateManual == 1){ft_custom_font_edit("Вкл. "); FT8_cmd_text(230,90+offset, 11, 0, outstring);}
+    }    
+    
+  }
+ 
+  
   FT8_cmd_dl(DL_DISPLAY);
   FT8_cmd_dl(CMD_SWAP);
   FT8_end_cmd_burst(); /* stop writing to the cmd-fifo */
@@ -1335,13 +1562,25 @@ void ft812_userL3(uint8_t paramMenu){
   ft_custom_font_edit("Шнек подачи"); FT8_cmd_text(10,5, 11, 0, outstring);
   FT8_cmd_line(0,25,319,25,3);
   
-  FT8_cmd_dl(DL_COLOR_RGB | 0x246e37);
-
-  if(paramMenu == 0)FT8_cmd_rect(0, 50, 319, 70, 1);
-  if(paramMenu == 1)FT8_cmd_rect(0, 70, 319, 90, 1);
-  if(paramMenu == 2)FT8_cmd_rect(0, 110, 319, 130, 1);
-  if(paramMenu == 3)FT8_cmd_rect(0, 130, 319, 150, 1);
-
+  if(menuLevel == MENU_LEVEL_PARAMETERS){
+    FT8_cmd_dl(DL_COLOR_RGB | 0x246e37);
+    if(paramMenu == 0)FT8_cmd_rect(0, 50, 319, 70, 1);
+    if(paramMenu == 1)FT8_cmd_rect(0, 70, 319, 90, 1);
+    if(paramMenu == 2)FT8_cmd_rect(0, 110, 319, 130, 1);
+    if(paramMenu == 3)FT8_cmd_rect(0, 130, 319, 150, 1);
+    FT8_cmd_dl(DL_COLOR_RGB | 0xffff00);
+  
+    char temp_string[5];
+    sprintf(temp_string, "%d", termStruct.screwRunWorkTime);
+    FT8_cmd_text(230, 30+offset, 23, 0, temp_string);   
+    sprintf(temp_string, "%d", termStruct.screwRunSleepTime);
+    FT8_cmd_text(230, 50+offset, 23, 0, temp_string);   
+    sprintf(temp_string, "%d", termStruct.screwSupportWorkTime);
+    FT8_cmd_text(230, 90+offset, 23, 0, temp_string);   
+    sprintf(temp_string, "%d", termStruct.screwSupportSleepTime);
+    FT8_cmd_text(230, 110+offset, 23, 0, temp_string);     
+  }    
+  
   
   FT8_cmd_dl(DL_COLOR_RGB | 0xffff00);
   ft_custom_font_edit("1.Нагрев:"); FT8_cmd_text(10,10+offset, 11, 0, outstring);
@@ -1351,6 +1590,60 @@ void ft812_userL3(uint8_t paramMenu){
   ft_custom_font_edit(" 2.1.Работа(сек)"); FT8_cmd_text(10,90+offset, 11, 0, outstring); 
   ft_custom_font_edit(" 2.2.Перерыв(мин)"); FT8_cmd_text(10,110+offset, 11, 0, outstring); 
 
+  if(menuLevel == MENU_LEVEL_ACCEPT){
+    FT8_cmd_dl(DL_COLOR_RGB | 0x246e37);
+    if(paramMenu == 0)FT8_cmd_rect(220, 50, 319, 70, 1);
+    if(paramMenu == 1)FT8_cmd_rect(220, 70, 319, 90, 1);
+    if(paramMenu == 2)FT8_cmd_rect(220, 110, 319, 130, 1);
+    if(paramMenu == 3)FT8_cmd_rect(220, 130, 319, 150, 1); 
+    FT8_cmd_dl(DL_COLOR_RGB | 0xffff00);
+    
+    if(paramMenu == 0){
+        char temp_string[5];
+        sprintf(temp_string, "%d", tempScrewRunWorkTime);
+        FT8_cmd_text(230, 30+offset, 23, 0, temp_string);   
+        sprintf(temp_string, "%d", termStruct.screwRunSleepTime);
+        FT8_cmd_text(230, 50+offset, 23, 0, temp_string);   
+        sprintf(temp_string, "%d", termStruct.screwSupportWorkTime);
+        FT8_cmd_text(230, 90+offset, 23, 0, temp_string);   
+        sprintf(temp_string, "%d", termStruct.screwSupportSleepTime);
+        FT8_cmd_text(230, 110+offset, 23, 0, temp_string);        
+    }
+    if(paramMenu == 1){
+        char temp_string[5];
+        sprintf(temp_string, "%d", termStruct.screwRunWorkTime);
+        FT8_cmd_text(230, 30+offset, 23, 0, temp_string);   
+        sprintf(temp_string, "%d", tempScrewRunSleepTime);
+        FT8_cmd_text(230, 50+offset, 23, 0, temp_string);   
+        sprintf(temp_string, "%d", termStruct.screwSupportWorkTime);
+        FT8_cmd_text(230, 90+offset, 23, 0, temp_string);   
+        sprintf(temp_string, "%d", termStruct.screwSupportSleepTime);
+        FT8_cmd_text(230, 110+offset, 23, 0, temp_string);        
+    }
+    if(paramMenu == 2){
+        char temp_string[5];
+        sprintf(temp_string, "%d", termStruct.screwRunWorkTime);
+        FT8_cmd_text(230, 30+offset, 23, 0, temp_string);   
+        sprintf(temp_string, "%d", termStruct.screwRunSleepTime);
+        FT8_cmd_text(230, 50+offset, 23, 0, temp_string);   
+        sprintf(temp_string, "%d", tempScrewSupportWorkTime);
+        FT8_cmd_text(230, 90+offset, 23, 0, temp_string);   
+        sprintf(temp_string, "%d", termStruct.screwSupportSleepTime);
+        FT8_cmd_text(230, 110+offset, 23, 0, temp_string);        
+    }
+    if(paramMenu == 3){
+        char temp_string[5];
+        sprintf(temp_string, "%d", termStruct.screwRunWorkTime);
+        FT8_cmd_text(230, 30+offset, 23, 0, temp_string);   
+        sprintf(temp_string, "%d", termStruct.screwRunSleepTime);
+        FT8_cmd_text(230, 50+offset, 23, 0, temp_string);   
+        sprintf(temp_string, "%d", termStruct.screwSupportWorkTime);
+        FT8_cmd_text(230, 90+offset, 23, 0, temp_string);   
+        sprintf(temp_string, "%d", tempScrewSupportSleepTime);
+        FT8_cmd_text(230, 110+offset, 23, 0, temp_string);        
+    }    
+  }
+  
   FT8_cmd_dl(DL_DISPLAY);
   FT8_cmd_dl(CMD_SWAP);
   FT8_end_cmd_burst(); /* stop writing to the cmd-fifo */
@@ -1380,6 +1673,15 @@ void ft812_userL4(uint8_t paramMenu){
   ft_custom_font_edit(" 1.2.Перерыв(сек)"); FT8_cmd_text(10,50+offset, 11, 0, outstring);
   ft_custom_font_edit("2.Макс. мощность"); FT8_cmd_text(10,70+offset, 11, 0, outstring);  
 
+  char temp_string[5];
+    
+  sprintf(temp_string, "%d", termStruct.fanSupportWorkTime);
+  FT8_cmd_text(230, 30+offset, 23, 0, temp_string);   
+  sprintf(temp_string, "%d", termStruct.fanSupportSleepTime);
+  FT8_cmd_text(230, 50+offset, 23, 0, temp_string);   
+  sprintf(temp_string, "%d", termStruct.fanPower);
+  FT8_cmd_text(230, 70+offset, 23, 0, temp_string); 
+  
   FT8_cmd_dl(DL_DISPLAY);
   FT8_cmd_dl(CMD_SWAP);
   FT8_end_cmd_burst(); /* stop writing to the cmd-fifo */
