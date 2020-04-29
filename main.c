@@ -135,7 +135,11 @@ struct termC_Struct{
     uint8_t pumpCOStateManual;
     uint8_t pumpGVSStateManual;
     uint8_t fanStateManual;
-    uint8_t screwReversStateManual;    
+    uint8_t screwReversStateManual;
+    uint8_t temperatureCO;
+    uint8_t temperatureGVS;
+    uint8_t hystCO;
+    uint8_t hystGVS;
 
 }termStruct;
 
@@ -253,6 +257,10 @@ int main(){
   termStruct.pumpGVSStateManual = 0;
   termStruct.fanStateManual = 0;
   termStruct.screwReversStateManual = 0;
+  termStruct.hystCO = 1;
+  termStruct.hystGVS = 1;
+  termStruct.temperatureCO = 45;
+  termStruct.temperatureGVS = 45;
   
   while(1){
     temp_actualGVSLevel_value[0] = adc_ch_array[5];
@@ -387,6 +395,13 @@ int main(){
             tempFanSupportWorkTime = termStruct.fanSupportWorkTime;
             tempFanSupportSleepTime = termStruct.fanSupportSleepTime;
             tempFanPower = termStruct.fanPower;
+            
+            tempTemperatureCO = termStruct.temperatureCO;
+            tempTemperatureGVS = termStruct.temperatureGVS;
+            tempHystCO = termStruct.hystCO;
+            tempHystGVS = termStruct.hystGVS;
+            
+            
         }
         
         btnAcceptShortPressEventCnt = 0;
@@ -399,13 +414,12 @@ int main(){
     
     if(menuLevel == MENU_LEVEL_ACCEPT){
       if(displayRefreshTime == 0){
-        displayRefreshTime = 200;
-        //ft812_acceptWindowCustom();
-      if(userMenuLevelPosition == 1) ft812_userL2(paramMenuLevelPosition);  
-      if(userMenuLevelPosition == 2) ft812_userL3(paramMenuLevelPosition); 
-      if(userMenuLevelPosition == 3) ft812_userL4(paramMenuLevelPosition); 
-      if(userMenuLevelPosition == 4) ft812_userL5(paramMenuLevelPosition); 
-      
+          displayRefreshTime = 200;
+          //ft812_acceptWindowCustom();
+          if(userMenuLevelPosition == 1) ft812_userL2(paramMenuLevelPosition);  
+          if(userMenuLevelPosition == 2) ft812_userL3(paramMenuLevelPosition); 
+          if(userMenuLevelPosition == 3) ft812_userL4(paramMenuLevelPosition); 
+          if(userMenuLevelPosition == 4) ft812_userL5(paramMenuLevelPosition); 
       }         
       if(btnPlusShortPressEventCnt != 0){
         btnPlusShortPressEventCnt = 0;
@@ -471,6 +485,7 @@ int main(){
           }
            
         }
+
       }      
       if(btnMinusShortPressEventCnt != 0){
         btnMinusShortPressEventCnt = 0;
@@ -564,6 +579,12 @@ int main(){
             if(paramMenuLevelPosition == 0)termStruct.fanSupportWorkTime = tempFanSupportWorkTime;
             if(paramMenuLevelPosition == 1)termStruct.fanSupportSleepTime = tempFanSupportSleepTime;
             if(paramMenuLevelPosition == 2)termStruct.fanPower = tempFanPower;
+        }
+        if(userMenuLevelPosition == 4){
+            if(paramMenuLevelPosition == 0)termStruct.temperatureCO = tempTemperatureCO;
+            if(paramMenuLevelPosition == 1)termStruct.hystCO = tempHystCO;
+            if(paramMenuLevelPosition == 2)termStruct.temperatureGVS = tempTemperatureGVS;
+            if(paramMenuLevelPosition == 3)termStruct.hystGVS = tempHystGVS;           
         }
         btnAcceptShortPressEventCnt = 0;
       }      
@@ -1805,22 +1826,110 @@ void ft812_userL5(uint8_t paramMenu){
   FT8_cmd_dl(DL_COLOR_RGB | GREY_COLOR);
   uint8_t offset = 20;
 
+  if(menuLevel == MENU_LEVEL_PARAMETERS){
+    FT8_cmd_dl(DL_COLOR_RGB | 0x246e37);
+    if(paramMenu == 0)FT8_cmd_rect(0, 30, 319, 50, 1);
+    if(paramMenu == 1)FT8_cmd_rect(0, 50, 319, 70, 1);
+    if(paramMenu == 2)FT8_cmd_rect(0, 70, 319, 90, 1);
+    if(paramMenu == 3)FT8_cmd_rect(0, 90, 319, 110, 1);
+    FT8_cmd_dl(DL_COLOR_RGB | 0xffff00);
+  
+    char temp_string[5];
+        
+    sprintf(temp_string, "+%d", termStruct.temperatureCO);
+    FT8_cmd_text(230, 10+offset, 23, 0, temp_string);  
+    ft_custom_font_edit("°С"); FT8_cmd_text(260, 10+offset, 11, 0, outstring);
+    sprintf(temp_string, "%d", termStruct.hystCO);
+    FT8_cmd_text(230, 30+offset, 23, 0, temp_string);
+    ft_custom_font_edit("°С"); FT8_cmd_text(260, 30+offset, 11, 0, outstring);
+    sprintf(temp_string, "+%d", termStruct.temperatureGVS);
+    FT8_cmd_text(230, 50+offset, 23, 0, temp_string);
+    ft_custom_font_edit("°С"); FT8_cmd_text(260, 50+offset, 11, 0, outstring);
+    sprintf(temp_string, "%d", termStruct.hystGVS);
+    FT8_cmd_text(230, 70+offset, 23, 0, temp_string);    
+    ft_custom_font_edit("°С"); FT8_cmd_text(260, 70+offset, 11, 0, outstring);
+  }   
+  
   FT8_cmd_dl(DL_COLOR_RGB | 0xeb9123);
   ft_custom_font_edit("Температура"); FT8_cmd_text(10,5, 11, 0, outstring);
   FT8_cmd_line(0,25,319,25,3);
-  FT8_cmd_dl(DL_COLOR_RGB | 0x246e37);
-  if(paramMenu == 0)FT8_cmd_rect(0, 30, 319, 50, 1);
-  if(paramMenu == 1)FT8_cmd_rect(0, 50, 319, 70, 1);
-  if(paramMenu == 2)FT8_cmd_rect(0, 70, 319, 90, 1);
-  if(paramMenu == 3)FT8_cmd_rect(0, 90, 319, 110, 1);
 
-  
   FT8_cmd_dl(DL_COLOR_RGB | 0xffff00);
   ft_custom_font_edit("1.Температура ЦО"); FT8_cmd_text(10,10+offset, 11, 0, outstring);
   ft_custom_font_edit("2.Гистерезис ЦО"); FT8_cmd_text(10,30+offset, 11, 0, outstring);
   ft_custom_font_edit("3.Температура ГВС"); FT8_cmd_text(10,50+offset, 11, 0, outstring);
   ft_custom_font_edit("4.Гистерезис ГВС"); FT8_cmd_text(10,70+offset, 11, 0, outstring);  
 
+  if(menuLevel == MENU_LEVEL_ACCEPT){
+    FT8_cmd_dl(DL_COLOR_RGB | 0x246e37);
+    if(paramMenu == 0)FT8_cmd_rect(220, 30, 319, 50, 1);
+    if(paramMenu == 1)FT8_cmd_rect(220, 50, 319, 70, 1);
+    if(paramMenu == 2)FT8_cmd_rect(220, 70, 319, 90, 1);
+    if(paramMenu == 3)FT8_cmd_rect(220, 90, 319, 110, 1);
+    FT8_cmd_dl(DL_COLOR_RGB | 0xffff00);
+    
+    if(paramMenu == 0){
+      char temp_string[5]; 
+        sprintf(temp_string, "+%d", tempTemperatureCO);
+        FT8_cmd_text(230, 10+offset, 23, 0, temp_string);
+        ft_custom_font_edit("°С"); FT8_cmd_text(260, 10+offset, 11, 0, outstring);
+        sprintf(temp_string, "%d", termStruct.hystCO);
+        FT8_cmd_text(230, 30+offset, 23, 0, temp_string);   
+        ft_custom_font_edit("°С"); FT8_cmd_text(260, 30+offset, 11, 0, outstring);
+        sprintf(temp_string, "+%d", termStruct.temperatureGVS);
+        FT8_cmd_text(230, 50+offset, 23, 0, temp_string);  
+        ft_custom_font_edit("°С"); FT8_cmd_text(260, 50+offset, 11, 0, outstring);
+        sprintf(temp_string, "%d", termStruct.hystGVS);
+        FT8_cmd_text(230, 70+offset, 23, 0, temp_string);       
+        ft_custom_font_edit("°С"); FT8_cmd_text(260, 70+offset, 11, 0, outstring);
+    }
+    if(paramMenu == 1){
+      char temp_string[5]; 
+        sprintf(temp_string, "+%d", termStruct.temperatureCO);
+        FT8_cmd_text(230, 10+offset, 23, 0, temp_string);  
+        ft_custom_font_edit("°С"); FT8_cmd_text(260, 10+offset, 11, 0, outstring);
+        sprintf(temp_string, "%d", tempHystCO);
+        FT8_cmd_text(230, 30+offset, 23, 0, temp_string);   
+        ft_custom_font_edit("°С"); FT8_cmd_text(260, 30+offset, 11, 0, outstring);
+        sprintf(temp_string, "+%d", termStruct.temperatureGVS);
+        FT8_cmd_text(230, 50+offset, 23, 0, temp_string);  
+        ft_custom_font_edit("°С"); FT8_cmd_text(260, 50+offset, 11, 0, outstring);
+        sprintf(temp_string, "%d", termStruct.hystGVS);
+        FT8_cmd_text(230, 70+offset, 23, 0, temp_string);         
+        ft_custom_font_edit("°С"); FT8_cmd_text(260, 70+offset, 11, 0, outstring);
+    }
+    if(paramMenu == 2){
+      char temp_string[5]; 
+        sprintf(temp_string, "+%d", termStruct.temperatureCO);
+        FT8_cmd_text(230, 10+offset, 23, 0, temp_string); 
+        ft_custom_font_edit("°С"); FT8_cmd_text(260, 10+offset, 11, 0, outstring);
+        sprintf(temp_string, "%d", termStruct.hystCO);
+        FT8_cmd_text(230, 30+offset, 23, 0, temp_string);   
+        ft_custom_font_edit("°С"); FT8_cmd_text(260, 30+offset, 11, 0, outstring);
+        sprintf(temp_string, "+%d", tempTemperatureGVS);
+        FT8_cmd_text(230, 50+offset, 23, 0, temp_string);  
+        ft_custom_font_edit("°С"); FT8_cmd_text(260, 50+offset, 11, 0, outstring);
+        sprintf(temp_string, "%d", termStruct.hystGVS);
+        FT8_cmd_text(230, 70+offset, 23, 0, temp_string);      
+        ft_custom_font_edit("°С"); FT8_cmd_text(260, 70+offset, 11, 0, outstring);
+    }
+    if(paramMenu == 3){
+      char temp_string[5]; 
+        sprintf(temp_string, "+%d", termStruct.temperatureCO);
+        FT8_cmd_text(230, 10+offset, 23, 0, temp_string);   
+        ft_custom_font_edit("°С"); FT8_cmd_text(260, 10+offset, 11, 0, outstring);
+        sprintf(temp_string, "%d", termStruct.hystCO);
+        FT8_cmd_text(230, 30+offset, 23, 0, temp_string);   
+        ft_custom_font_edit("°С"); FT8_cmd_text(260, 30+offset, 11, 0, outstring);
+        sprintf(temp_string, "+%d", termStruct.temperatureGVS);
+        FT8_cmd_text(230, 50+offset, 23, 0, temp_string);  
+        ft_custom_font_edit("°С"); FT8_cmd_text(260, 50+offset, 11, 0, outstring);
+        sprintf(temp_string, "%d", tempHystGVS);
+        FT8_cmd_text(230, 70+offset, 23, 0, temp_string);      
+        ft_custom_font_edit("°С"); FT8_cmd_text(260, 70+offset, 11, 0, outstring);
+    } 
+  }  
+  
   FT8_cmd_dl(DL_DISPLAY);
   FT8_cmd_dl(CMD_SWAP);
   FT8_end_cmd_burst(); /* stop writing to the cmd-fifo */
