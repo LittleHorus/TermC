@@ -1,11 +1,11 @@
-#include <string>
+п»ї#include <string>
 #include <array>
 #include <iostream>
 #include <opencv2/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #pragma once
 
-namespace ConsoleSerial {
+namespace SerialApp {
 
 	using namespace System;
 	using namespace System::ComponentModel;
@@ -18,9 +18,9 @@ namespace ConsoleSerial {
 	using namespace System::IO;
 	//using namespace cv;
 
-	
+
 	/// <summary>
-	/// Сводка для MyForm
+	/// Г‘ГўГ®Г¤ГЄГ  Г¤Г«Гї MyForm
 	/// </summary>
 	public ref class MyForm : public System::Windows::Forms::Form
 	{
@@ -35,7 +35,7 @@ namespace ConsoleSerial {
 		Int16 dowBoyZC = 0;
 		UInt16 netAddress = 1;
 		//Bitmap^ bm = gcnew Bitmap("frame_mf_2148.png");
-		
+
 		UInt16 crcInit = 0xffff;
 		Byte imageOrder = 10;
 
@@ -51,43 +51,43 @@ namespace ConsoleSerial {
 	private: System::Windows::Forms::TextBox^ textBoxZC;
 
 
-		static array<UInt16>^ crcTable = gcnew array<UInt16>{
-		0x0000, 0xC0C1, 0xC181, 0x0140, 0xC301, 0x03C0, 0x0280, 0xC241,
-		0xC601, 0x06C0, 0x0780, 0xC741, 0x0500, 0xC5C1, 0xC481, 0x0440,
-		0xCC01, 0x0CC0, 0x0D80, 0xCD41, 0x0F00, 0xCFC1, 0xCE81, 0x0E40,
-		0x0A00, 0xCAC1, 0xCB81, 0x0B40, 0xC901, 0x09C0, 0x0880, 0xC841,
-		0xD801, 0x18C0, 0x1980, 0xD941, 0x1B00, 0xDBC1, 0xDA81, 0x1A40,
-		0x1E00, 0xDEC1, 0xDF81, 0x1F40, 0xDD01, 0x1DC0, 0x1C80, 0xDC41,
-		0x1400, 0xD4C1, 0xD581, 0x1540, 0xD701, 0x17C0, 0x1680, 0xD641,
-		0xD201, 0x12C0, 0x1380, 0xD341, 0x1100, 0xD1C1, 0xD081, 0x1040,
-		0xF001, 0x30C0, 0x3180, 0xF141, 0x3300, 0xF3C1, 0xF281, 0x3240,
-		0x3600, 0xF6C1, 0xF781, 0x3740, 0xF501, 0x35C0, 0x3480, 0xF441,
-		0x3C00, 0xFCC1, 0xFD81, 0x3D40, 0xFF01, 0x3FC0, 0x3E80, 0xFE41,
-		0xFA01, 0x3AC0, 0x3B80, 0xFB41, 0x3900, 0xF9C1, 0xF881, 0x3840,
-		0x2800, 0xE8C1, 0xE981, 0x2940, 0xEB01, 0x2BC0, 0x2A80, 0xEA41,
-		0xEE01, 0x2EC0, 0x2F80, 0xEF41, 0x2D00, 0xEDC1, 0xEC81, 0x2C40,
-		0xE401, 0x24C0, 0x2580, 0xE541, 0x2700, 0xE7C1, 0xE681, 0x2640,
-		0x2200, 0xE2C1, 0xE381, 0x2340, 0xE101, 0x21C0, 0x2080, 0xE041,
-		0xA001, 0x60C0, 0x6180, 0xA141, 0x6300, 0xA3C1, 0xA281, 0x6240,
-		0x6600, 0xA6C1, 0xA781, 0x6740, 0xA501, 0x65C0, 0x6480, 0xA441,
-		0x6C00, 0xACC1, 0xAD81, 0x6D40, 0xAF01, 0x6FC0, 0x6E80, 0xAE41,
-		0xAA01, 0x6AC0, 0x6B80, 0xAB41, 0x6900, 0xA9C1, 0xA881, 0x6840,
-		0x7800, 0xB8C1, 0xB981, 0x7940, 0xBB01, 0x7BC0, 0x7A80, 0xBA41,
-		0xBE01, 0x7EC0, 0x7F80, 0xBF41, 0x7D00, 0xBDC1, 0xBC81, 0x7C40,
-		0xB401, 0x74C0, 0x7580, 0xB541, 0x7700, 0xB7C1, 0xB681, 0x7640,
-		0x7200, 0xB2C1, 0xB381, 0x7340, 0xB101, 0x71C0, 0x7080, 0xB041,
-		0x5000, 0x90C1, 0x9181, 0x5140, 0x9301, 0x53C0, 0x5280, 0x9241,
-		0x9601, 0x56C0, 0x5780, 0x9741, 0x5500, 0x95C1, 0x9481, 0x5440,
-		0x9C01, 0x5CC0, 0x5D80, 0x9D41, 0x5F00, 0x9FC1, 0x9E81, 0x5E40,
-		0x5A00, 0x9AC1, 0x9B81, 0x5B40, 0x9901, 0x59C0, 0x5880, 0x9841,
-		0x8801, 0x48C0, 0x4980, 0x8941, 0x4B00, 0x8BC1, 0x8A81, 0x4A40,
-		0x4E00, 0x8EC1, 0x8F81, 0x4F40, 0x8D01, 0x4DC0, 0x4C80, 0x8C41,
-		0x4400, 0x84C1, 0x8581, 0x4540, 0x8701, 0x47C0, 0x4680, 0x8641,
-		0x8201, 0x42C0, 0x4380, 0x8341, 0x4100, 0x81C1, 0x8081, 0x4040
-		};
+		   static array<UInt16>^ crcTable = gcnew array<UInt16>{
+			   0x0000, 0xC0C1, 0xC181, 0x0140, 0xC301, 0x03C0, 0x0280, 0xC241,
+				   0xC601, 0x06C0, 0x0780, 0xC741, 0x0500, 0xC5C1, 0xC481, 0x0440,
+				   0xCC01, 0x0CC0, 0x0D80, 0xCD41, 0x0F00, 0xCFC1, 0xCE81, 0x0E40,
+				   0x0A00, 0xCAC1, 0xCB81, 0x0B40, 0xC901, 0x09C0, 0x0880, 0xC841,
+				   0xD801, 0x18C0, 0x1980, 0xD941, 0x1B00, 0xDBC1, 0xDA81, 0x1A40,
+				   0x1E00, 0xDEC1, 0xDF81, 0x1F40, 0xDD01, 0x1DC0, 0x1C80, 0xDC41,
+				   0x1400, 0xD4C1, 0xD581, 0x1540, 0xD701, 0x17C0, 0x1680, 0xD641,
+				   0xD201, 0x12C0, 0x1380, 0xD341, 0x1100, 0xD1C1, 0xD081, 0x1040,
+				   0xF001, 0x30C0, 0x3180, 0xF141, 0x3300, 0xF3C1, 0xF281, 0x3240,
+				   0x3600, 0xF6C1, 0xF781, 0x3740, 0xF501, 0x35C0, 0x3480, 0xF441,
+				   0x3C00, 0xFCC1, 0xFD81, 0x3D40, 0xFF01, 0x3FC0, 0x3E80, 0xFE41,
+				   0xFA01, 0x3AC0, 0x3B80, 0xFB41, 0x3900, 0xF9C1, 0xF881, 0x3840,
+				   0x2800, 0xE8C1, 0xE981, 0x2940, 0xEB01, 0x2BC0, 0x2A80, 0xEA41,
+				   0xEE01, 0x2EC0, 0x2F80, 0xEF41, 0x2D00, 0xEDC1, 0xEC81, 0x2C40,
+				   0xE401, 0x24C0, 0x2580, 0xE541, 0x2700, 0xE7C1, 0xE681, 0x2640,
+				   0x2200, 0xE2C1, 0xE381, 0x2340, 0xE101, 0x21C0, 0x2080, 0xE041,
+				   0xA001, 0x60C0, 0x6180, 0xA141, 0x6300, 0xA3C1, 0xA281, 0x6240,
+				   0x6600, 0xA6C1, 0xA781, 0x6740, 0xA501, 0x65C0, 0x6480, 0xA441,
+				   0x6C00, 0xACC1, 0xAD81, 0x6D40, 0xAF01, 0x6FC0, 0x6E80, 0xAE41,
+				   0xAA01, 0x6AC0, 0x6B80, 0xAB41, 0x6900, 0xA9C1, 0xA881, 0x6840,
+				   0x7800, 0xB8C1, 0xB981, 0x7940, 0xBB01, 0x7BC0, 0x7A80, 0xBA41,
+				   0xBE01, 0x7EC0, 0x7F80, 0xBF41, 0x7D00, 0xBDC1, 0xBC81, 0x7C40,
+				   0xB401, 0x74C0, 0x7580, 0xB541, 0x7700, 0xB7C1, 0xB681, 0x7640,
+				   0x7200, 0xB2C1, 0xB381, 0x7340, 0xB101, 0x71C0, 0x7080, 0xB041,
+				   0x5000, 0x90C1, 0x9181, 0x5140, 0x9301, 0x53C0, 0x5280, 0x9241,
+				   0x9601, 0x56C0, 0x5780, 0x9741, 0x5500, 0x95C1, 0x9481, 0x5440,
+				   0x9C01, 0x5CC0, 0x5D80, 0x9D41, 0x5F00, 0x9FC1, 0x9E81, 0x5E40,
+				   0x5A00, 0x9AC1, 0x9B81, 0x5B40, 0x9901, 0x59C0, 0x5880, 0x9841,
+				   0x8801, 0x48C0, 0x4980, 0x8941, 0x4B00, 0x8BC1, 0x8A81, 0x4A40,
+				   0x4E00, 0x8EC1, 0x8F81, 0x4F40, 0x8D01, 0x4DC0, 0x4C80, 0x8C41,
+				   0x4400, 0x84C1, 0x8581, 0x4540, 0x8701, 0x47C0, 0x4680, 0x8641,
+				   0x8201, 0x42C0, 0x4380, 0x8341, 0x4100, 0x81C1, 0x8081, 0x4040
+		   };
 
-	[System::Runtime::InteropServices::DllImportAttribute("gdi32.dll")]
-	static bool DeleteObject(IntPtr hObject);
+		   [System::Runtime::InteropServices::DllImportAttribute("gdi32.dll")]
+		   static bool DeleteObject(IntPtr hObject);
 
 	public:
 		MyForm(void)
@@ -103,13 +103,13 @@ namespace ConsoleSerial {
 
 
 			findPorts();
-			//TODO: добавьте код конструктора
+			//TODO: Г¤Г®ГЎГ ГўГјГІГҐ ГЄГ®Г¤ ГЄГ®Г­Г±ГІГ°ГіГЄГІГ®Г°Г 
 			//
 		}
 
 	protected:
 		/// <summary>
-		/// Освободить все используемые ресурсы.
+		/// ГЋГ±ГўГ®ГЎГ®Г¤ГЁГІГј ГўГ±ГҐ ГЁГ±ГЇГ®Г«ГјГ§ГіГҐГ¬Г»ГҐ Г°ГҐГ±ГіГ°Г±Г».
 		/// </summary>
 		~MyForm()
 		{
@@ -162,14 +162,14 @@ namespace ConsoleSerial {
 
 	private:
 		/// <summary>
-		/// Обязательная переменная конструктора.
+		/// ГЋГЎГїГ§Г ГІГҐГ«ГјГ­Г Гї ГЇГҐГ°ГҐГ¬ГҐГ­Г­Г Гї ГЄГ®Г­Г±ГІГ°ГіГЄГІГ®Г°Г .
 		/// </summary>
 
 
 #pragma region Windows Form Designer generated code
 		/// <summary>
-		/// Требуемый метод для поддержки конструктора — не изменяйте 
-		/// содержимое этого метода с помощью редактора кода.
+		/// Г’Г°ГҐГЎГіГҐГ¬Г»Г© Г¬ГҐГІГ®Г¤ Г¤Г«Гї ГЇГ®Г¤Г¤ГҐГ°Г¦ГЄГЁ ГЄГ®Г­Г±ГІГ°ГіГЄГІГ®Г°Г  вЂ” Г­ГҐ ГЁГ§Г¬ГҐГ­ГїГ©ГІГҐ 
+		/// Г±Г®Г¤ГҐГ°Г¦ГЁГ¬Г®ГҐ ГЅГІГ®ГЈГ® Г¬ГҐГІГ®Г¤Г  Г± ГЇГ®Г¬Г®Г№ГјГѕ Г°ГҐГ¤Г ГЄГІГ®Г°Г  ГЄГ®Г¤Г .
 		/// </summary>
 		void InitializeComponent(void)
 		{
@@ -220,6 +220,7 @@ namespace ConsoleSerial {
 			this->comboBox_comportList->Name = L"comboBox_comportList";
 			this->comboBox_comportList->Size = System::Drawing::Size(102, 21);
 			this->comboBox_comportList->TabIndex = 0;
+			this->comboBox_comportList->TabStop = false;
 			this->comboBox_comportList->DropDown += gcnew System::EventHandler(this, &MyForm::ComboBox_comportList_SelectedIndexChanged_DropDown);
 			this->comboBox_comportList->SelectedIndexChanged += gcnew System::EventHandler(this, &MyForm::ComboBox_comportList_SelectedIndexChanged);
 			// 
@@ -234,6 +235,7 @@ namespace ConsoleSerial {
 			this->btn_connect->Name = L"btn_connect";
 			this->btn_connect->Size = System::Drawing::Size(82, 34);
 			this->btn_connect->TabIndex = 1;
+			this->btn_connect->TabStop = false;
 			this->btn_connect->Text = L"Connect";
 			this->btn_connect->UseVisualStyleBackColor = false;
 			this->btn_connect->Click += gcnew System::EventHandler(this, &MyForm::Button1_Click);
@@ -258,9 +260,9 @@ namespace ConsoleSerial {
 			this->textBoxSpeed->MaxLength = 6;
 			this->textBoxSpeed->Name = L"textBoxSpeed";
 			this->textBoxSpeed->Size = System::Drawing::Size(100, 21);
-			this->textBoxSpeed->TabIndex = 3;
+			this->textBoxSpeed->TabIndex = 1;
 			this->textBoxSpeed->TextAlign = System::Windows::Forms::HorizontalAlignment::Center;
-			this->textBoxSpeed->TextChanged += gcnew System::EventHandler(this, &MyForm::TextBoxSpeed_TextChanged);
+			this->textBoxSpeed->Leave += gcnew System::EventHandler(this, &MyForm::TextBoxSpeed_TextChanged);
 			// 
 			// labelParam1
 			// 
@@ -292,9 +294,9 @@ namespace ConsoleSerial {
 			this->textBoxPulse->Location = System::Drawing::Point(227, 93);
 			this->textBoxPulse->Name = L"textBoxPulse";
 			this->textBoxPulse->Size = System::Drawing::Size(100, 21);
-			this->textBoxPulse->TabIndex = 6;
+			this->textBoxPulse->TabIndex = 2;
 			this->textBoxPulse->TextAlign = System::Windows::Forms::HorizontalAlignment::Center;
-			this->textBoxPulse->TextChanged += gcnew System::EventHandler(this, &MyForm::TextBoxPulse_TextChanged);
+			this->textBoxPulse->Leave += gcnew System::EventHandler(this, &MyForm::TextBoxPulse_TextChanged);
 			// 
 			// buttonSend
 			// 
@@ -305,6 +307,7 @@ namespace ConsoleSerial {
 			this->buttonSend->Name = L"buttonSend";
 			this->buttonSend->Size = System::Drawing::Size(75, 23);
 			this->buttonSend->TabIndex = 7;
+			this->buttonSend->TabStop = false;
 			this->buttonSend->Text = L"Send";
 			this->buttonSend->UseVisualStyleBackColor = false;
 			this->buttonSend->Click += gcnew System::EventHandler(this, &MyForm::ButtonSend_Click);
@@ -316,6 +319,7 @@ namespace ConsoleSerial {
 			this->textBoxRX->Name = L"textBoxRX";
 			this->textBoxRX->Size = System::Drawing::Size(230, 21);
 			this->textBoxRX->TabIndex = 8;
+			this->textBoxRX->TabStop = false;
 			this->textBoxRX->Text = L"Received Data";
 			// 
 			// textBoxTX
@@ -324,6 +328,7 @@ namespace ConsoleSerial {
 			this->textBoxTX->Name = L"textBoxTX";
 			this->textBoxTX->Size = System::Drawing::Size(230, 21);
 			this->textBoxTX->TabIndex = 9;
+			this->textBoxTX->TabStop = false;
 			this->textBoxTX->Text = L"Tranceived Data";
 			// 
 			// buttonSendCustom
@@ -335,6 +340,7 @@ namespace ConsoleSerial {
 			this->buttonSendCustom->Name = L"buttonSendCustom";
 			this->buttonSendCustom->Size = System::Drawing::Size(75, 50);
 			this->buttonSendCustom->TabIndex = 10;
+			this->buttonSendCustom->TabStop = false;
 			this->buttonSendCustom->Text = L"SendData";
 			this->buttonSendCustom->UseVisualStyleBackColor = false;
 			this->buttonSendCustom->Click += gcnew System::EventHandler(this, &MyForm::ButtonSendCustom_Click);
@@ -344,9 +350,10 @@ namespace ConsoleSerial {
 			this->textBoxX->Location = System::Drawing::Point(14, 148);
 			this->textBoxX->Name = L"textBoxX";
 			this->textBoxX->Size = System::Drawing::Size(100, 21);
-			this->textBoxX->TabIndex = 11;
+			this->textBoxX->TabIndex = 3;
 			this->textBoxX->TextAlign = System::Windows::Forms::HorizontalAlignment::Center;
-			this->textBoxX->TextChanged += gcnew System::EventHandler(this, &MyForm::TextBoxX_TextChanged);
+			this->textBoxX->Leave += gcnew System::EventHandler(this, &MyForm::TextBoxX_TextChanged);
+			this->textBoxX->KeyDown += gcnew KeyEventHandler(this, &MyForm::TextBoxX_EnterPressed);
 			// 
 			// X_ax_label
 			// 
@@ -365,14 +372,16 @@ namespace ConsoleSerial {
 			// 
 			this->comboBoxCMD->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
 			this->comboBoxCMD->FormattingEnabled = true;
-			this->comboBoxCMD->Items->AddRange(gcnew cli::array< System::Object^  >(9) {
+			this->comboBoxCMD->Items->AddRange(gcnew cli::array< System::Object^  >(13) {
 				L"Set Direction", L"Set Speed", L"Set Pulse count",
-					L"Set XYZ position", L"Set X", L"Set Y", L"Set Z", L"Set Y(centered)", L"Set Z(centered)"
+					L"Set XYZ position", L"Set X", L"Set Y", L"Set Z", L"Set Y(centered)", L"Set Z(centered)", L"Set mm(X)", L"Set mm(Y)", L"Set mm(Z)",
+					L"Set mm(XYZ)"
 			});
 			this->comboBoxCMD->Location = System::Drawing::Point(123, 266);
 			this->comboBoxCMD->Name = L"comboBoxCMD";
 			this->comboBoxCMD->Size = System::Drawing::Size(121, 21);
 			this->comboBoxCMD->TabIndex = 13;
+			this->comboBoxCMD->TabStop = false;
 			this->comboBoxCMD->SelectedIndexChanged += gcnew System::EventHandler(this, &MyForm::ComboBox1_SelectedIndexChanged);
 			// 
 			// label2
@@ -415,18 +424,20 @@ namespace ConsoleSerial {
 			this->textBoxY->Location = System::Drawing::Point(121, 148);
 			this->textBoxY->Name = L"textBoxY";
 			this->textBoxY->Size = System::Drawing::Size(100, 21);
-			this->textBoxY->TabIndex = 17;
+			this->textBoxY->TabIndex = 4;
 			this->textBoxY->TextAlign = System::Windows::Forms::HorizontalAlignment::Center;
-			this->textBoxY->TextChanged += gcnew System::EventHandler(this, &MyForm::TextBoxY_TextChanged);
+			this->textBoxY->Leave += gcnew System::EventHandler(this, &MyForm::TextBoxY_TextChanged);
+			this->textBoxY->KeyPress += gcnew  KeyPressEventHandler(this, &MyForm::TextBoxY_EnterPressed);
 			// 
 			// textBoxZ
 			// 
 			this->textBoxZ->Location = System::Drawing::Point(228, 148);
 			this->textBoxZ->Name = L"textBoxZ";
 			this->textBoxZ->Size = System::Drawing::Size(100, 21);
-			this->textBoxZ->TabIndex = 18;
+			this->textBoxZ->TabIndex = 5;
 			this->textBoxZ->TextAlign = System::Windows::Forms::HorizontalAlignment::Center;
-			this->textBoxZ->TextChanged += gcnew System::EventHandler(this, &MyForm::TextBoxZ_TextChanged);
+			this->textBoxZ->Leave += gcnew System::EventHandler(this, &MyForm::TextBoxZ_TextChanged);
+			this->textBoxZ->KeyPress += gcnew  KeyPressEventHandler(this, &MyForm::TextBoxZ_EnterPressed);
 			// 
 			// radio_dirForward
 			// 
@@ -438,7 +449,6 @@ namespace ConsoleSerial {
 			this->radio_dirForward->Name = L"radio_dirForward";
 			this->radio_dirForward->Size = System::Drawing::Size(74, 20);
 			this->radio_dirForward->TabIndex = 19;
-			this->radio_dirForward->TabStop = true;
 			this->radio_dirForward->Text = L"Forward";
 			this->radio_dirForward->UseVisualStyleBackColor = true;
 			// 
@@ -462,6 +472,7 @@ namespace ConsoleSerial {
 			this->statusString->Name = L"statusString";
 			this->statusString->Size = System::Drawing::Size(230, 49);
 			this->statusString->TabIndex = 21;
+			this->statusString->TabStop = false;
 			this->statusString->Text = L"Status string";
 			// 
 			// textBoxCRC
@@ -471,6 +482,7 @@ namespace ConsoleSerial {
 			this->textBoxCRC->Name = L"textBoxCRC";
 			this->textBoxCRC->Size = System::Drawing::Size(72, 21);
 			this->textBoxCRC->TabIndex = 22;
+			this->textBoxCRC->TabStop = false;
 			this->textBoxCRC->Text = L"CRC_result";
 			// 
 			// comboBoxAddress
@@ -485,7 +497,8 @@ namespace ConsoleSerial {
 			this->comboBoxAddress->Location = System::Drawing::Point(23, 266);
 			this->comboBoxAddress->Name = L"comboBoxAddress";
 			this->comboBoxAddress->Size = System::Drawing::Size(58, 21);
-			this->comboBoxAddress->TabIndex = 23;
+			this->comboBoxAddress->TabIndex = 8;
+			this->comboBoxAddress->TabStop = false;
 			this->comboBoxAddress->SelectedIndexChanged += gcnew System::EventHandler(this, &MyForm::ComboBoxAddress_SelectedIndexChanged);
 			// 
 			// label3
@@ -501,9 +514,9 @@ namespace ConsoleSerial {
 			// 
 			// pictureBox1
 			// 
-			this->pictureBox1->ErrorImage = (cli::safe_cast<System::Drawing::Image^>(resources->GetObject(L"pictureBox1.ErrorImage")));
+			this->pictureBox1->ErrorImage = nullptr;
 			this->pictureBox1->Image = (cli::safe_cast<System::Drawing::Image^>(resources->GetObject(L"pictureBox1.Image")));
-			this->pictureBox1->InitialImage = (cli::safe_cast<System::Drawing::Image^>(resources->GetObject(L"pictureBox1.InitialImage")));
+			this->pictureBox1->InitialImage = nullptr;
 			this->pictureBox1->Location = System::Drawing::Point(354, 58);
 			this->pictureBox1->Name = L"pictureBox1";
 			this->pictureBox1->Size = System::Drawing::Size(530, 396);
@@ -517,6 +530,7 @@ namespace ConsoleSerial {
 			this->buttonImageUpdate->Name = L"buttonImageUpdate";
 			this->buttonImageUpdate->Size = System::Drawing::Size(95, 36);
 			this->buttonImageUpdate->TabIndex = 26;
+			this->buttonImageUpdate->TabStop = false;
 			this->buttonImageUpdate->Text = L"Image Update";
 			this->buttonImageUpdate->UseVisualStyleBackColor = true;
 			this->buttonImageUpdate->Click += gcnew System::EventHandler(this, &MyForm::ButtonImageUpdate_Click);
@@ -556,9 +570,10 @@ namespace ConsoleSerial {
 			this->textBoxYC->MaxLength = 7;
 			this->textBoxYC->Name = L"textBoxYC";
 			this->textBoxYC->Size = System::Drawing::Size(100, 21);
-			this->textBoxYC->TabIndex = 29;
+			this->textBoxYC->TabIndex = 6;
 			this->textBoxYC->TextAlign = System::Windows::Forms::HorizontalAlignment::Center;
-			this->textBoxYC->TextChanged += gcnew System::EventHandler(this, &MyForm::TextBoxYC_TextChanged);
+			this->textBoxYC->Leave += gcnew System::EventHandler(this, &MyForm::TextBoxYC_TextChanged);
+			this->textBoxYC->KeyPress += gcnew  KeyPressEventHandler(this, &MyForm::TextBoxYC_EnterPressed);
 			// 
 			// textBoxZC
 			// 
@@ -566,9 +581,10 @@ namespace ConsoleSerial {
 			this->textBoxZC->MaxLength = 7;
 			this->textBoxZC->Name = L"textBoxZC";
 			this->textBoxZC->Size = System::Drawing::Size(100, 21);
-			this->textBoxZC->TabIndex = 30;
+			this->textBoxZC->TabIndex = 7;
 			this->textBoxZC->TextAlign = System::Windows::Forms::HorizontalAlignment::Center;
-			this->textBoxZC->TextChanged += gcnew System::EventHandler(this, &MyForm::TextBoxZC_TextChanged);
+			this->textBoxZC->Leave += gcnew System::EventHandler(this, &MyForm::TextBoxZC_TextChanged);
+			this->textBoxZC->KeyPress += gcnew  KeyPressEventHandler(this, &MyForm::TextBoxZC_EnterPressed);
 			// 
 			// MyForm
 			// 
@@ -608,7 +624,6 @@ namespace ConsoleSerial {
 			this->Controls->Add(this->btn_connect);
 			this->Controls->Add(this->comboBox_comportList);
 			this->FormBorderStyle = System::Windows::Forms::FormBorderStyle::FixedSingle;
-			this->Icon = (cli::safe_cast<System::Drawing::Icon^>(resources->GetObject(L"$this.Icon")));
 			this->MaximumSize = System::Drawing::Size(1024, 768);
 			this->MinimumSize = System::Drawing::Size(600, 420);
 			this->Name = L"MyForm";
@@ -620,10 +635,10 @@ namespace ConsoleSerial {
 
 		}
 #pragma endregion
-	//find available ports
+		//find available ports
 	private: void	findPorts(void) {
 		array<Object^>^ objectArray = SerialPort::GetPortNames();
-		
+
 		//array<Object^>^ objectArray = System::IO::Ports::SerialPort::GetPortNames();
 		this->comboBox_comportList->Items->Clear();
 		this->comboBox_comportList->Items->AddRange(objectArray);
@@ -682,501 +697,732 @@ namespace ConsoleSerial {
 
 
 	}
-	private: System::Void ComboBox_comportList_SelectedIndexChanged_DropDown(Object^ sender, System::EventArgs^ e){
+	private: System::Void ComboBox_comportList_SelectedIndexChanged_DropDown(Object^ sender, System::EventArgs^ e) {
 		findPorts();
 	}
-			 
 
-private: System::Void Label2_Click(System::Object^ sender, System::EventArgs^ e) {
-}
+
+	private: System::Void Label2_Click(System::Object^ sender, System::EventArgs^ e) {
+	}
 	private: System::Void ComboBox1_SelectedIndexChanged(System::Object^ sender, System::EventArgs^ e) {
-	if (this->_serialPort->IsOpen) {
-		if (!this->buttonSend->Enabled)this->buttonSend->Enabled = 1;
-	}
-}
-private: System::Void ButtonSendCustom_Click(System::Object^ sender, System::EventArgs^ e) {
-	try {
-		this->_serialPort->Write(this->textBoxTX->Text);
-		try {
-			this->textBoxRX->Text = this->_serialPort->ReadExisting();
-		}
-		catch (TimeoutException^) {
-			this->statusString->Text = "Timeout RX";
+		if (this->_serialPort->IsOpen) {
+			if (!this->buttonSend->Enabled)this->buttonSend->Enabled = 1;
 		}
 	}
-	catch(ArgumentNullException^){
-		this->statusString->Text = "null string";
-	}
-	catch(InvalidOperationException^) {
-		this->statusString->Text = "InvalidOperation";
-	}
-	
-}
-private: System::Void ButtonSend_Click(System::Object^ sender, System::EventArgs^ e) {
-
-	System::String^ cmdState = this->comboBoxCMD->Text;
-	
-	int readByteArray[50];
-	if (cmdState == "Set Direction") {
-		//Format byte order:
-		//{netAddress}{CMD}{start_reg_hi}{start_reg_lo}{reg_cnt}{byte_cnt}{data}....{crc_hi}{crc_lo}
-		array<Byte>^ sendDataChars = gcnew array<Byte>{0x01, 0x10, 0x00, 0x00, 0x00, 0x01, 0x02, 0x00, 0x00, 0x00, 0x00};
-		//Byte sendArray[11] = { 0x01, 0x10, 0x00, 0x02, 0x00, 0x01, 0x02, 0x00, 0x00, 0x00, 0x00 };
+	private: System::Void ButtonSendCustom_Click(System::Object^ sender, System::EventArgs^ e) {
 		try {
-			//sendDataChars[3] = 0x02;
-			sendDataChars[5] = 0x01;
-			sendDataChars[6] = 0x02;
-			
-			if (this->radio_dirForward->Checked) {
-				sendDataChars[8] = 0x01;
-			}
-			else {
-				sendDataChars[8] = 0x00;
-			}
-			UInt16 temp_crc_result = CRC_Calc16(sendDataChars, sendDataChars->Length-2);
-			this->textBoxCRC->Text = Convert::ToString(temp_crc_result,16);
-			sendDataChars[9] = (Byte)(temp_crc_result&0xff);
-			sendDataChars[10] = (Byte)(temp_crc_result>>8);
-			this->_serialPort->Write(sendDataChars, 0, sendDataChars->Length);
+			this->_serialPort->Write(this->textBoxTX->Text);
 			try {
-				for (int i_rb = 0; i_rb < 8; i_rb++) {
-					readByteArray[i_rb] = this->_serialPort->ReadByte();
-				}
-				if (readByteArray[0] == 0x01) {
-					System::String^ formatedString = System::String::Format("0x{0,2:X2} 0x{1,2:X2} 0x{2,2:X2} 0x{3,2:X2} 0x{4,2:X2} 0x{5,2:X2} 0x{6,2:X2} 0x{7,2:X2}", \
-						readByteArray[0], readByteArray[1], readByteArray[2], readByteArray[3], readByteArray[4], \
-						readByteArray[5], readByteArray[6], readByteArray[7]);
-					//this->statusString->Text = Convert::ToString(sendDataChars->Length);
-					this->statusString->Text = formatedString;
-				}
+				this->textBoxRX->Text = this->_serialPort->ReadExisting();
 			}
 			catch (TimeoutException^) {
-				this->statusString->Text = "TimeoutRx_sendCmd";
+				this->statusString->Text = "Timeout RX";
 			}
 		}
-		catch (InvalidOperationException^) {
-			;
+		catch (ArgumentNullException^) {
+			this->statusString->Text = "null string";
 		}
+		catch (InvalidOperationException^) {
+			this->statusString->Text = "InvalidOperation";
+		}
+
 	}
-	if (cmdState == "Set Speed") {
-		array<Byte>^ sendDataChars = gcnew array<Byte>{0x01, 0x10, 0x00, 0x01, 0x00, 0x01, 0x02, 0x00, 0x00, 0x00, 0x00};
-		try {
-			//sendDataChars[3] = 0x02;
-			sendDataChars[5] = 0x01;
-			sendDataChars[6] = 0x02;
-			sendDataChars[7] = Convert::ToByte(motorSpeed>>8);
-			sendDataChars[8] = Convert::ToByte(motorSpeed&0xff);
-			UInt16 temp_crc_result = CRC_Calc16(sendDataChars, sendDataChars->Length - 2);
-			this->textBoxCRC->Text = Convert::ToString(temp_crc_result,16);
-			sendDataChars[10] = (Byte)(temp_crc_result >> 8);
-			sendDataChars[9] = (Byte)(temp_crc_result & 0xff);
-			this->_serialPort->Write(sendDataChars, 0, sendDataChars->Length);
+
+		   //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		   //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		   ///!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	private: System::Void ButtonSend_Click(System::Object^ sender, System::EventArgs^ e) {
+
+		System::String^ cmdState = this->comboBoxCMD->Text;
+
+		int readByteArray[50];
+		if (cmdState == "Set Direction") {
+			//Format byte order:
+			//{netAddress}{CMD}{start_reg_hi}{start_reg_lo}{reg_cnt}{byte_cnt}{data}....{crc_hi}{crc_lo}
+			array<Byte>^ sendDataChars = gcnew array<Byte>{0x01, 0x10, 0x00, 0x00, 0x00, 0x01, 0x02, 0x00, 0x00, 0x00, 0x00};
+			//Byte sendArray[11] = { 0x01, 0x10, 0x00, 0x02, 0x00, 0x01, 0x02, 0x00, 0x00, 0x00, 0x00 };
 			try {
-				for (int i_rb = 0; i_rb < 8; i_rb++) {
-					readByteArray[i_rb] = this->_serialPort->ReadByte();
-				}
-				if (readByteArray[0] == 0x01) {
-					System::String^ formatedString = System::String::Format("0x{0,2:X2} 0x{1,2:X2} 0x{2,2:X2} 0x{3,2:X2} 0x{4,2:X2} 0x{5,2:X2} 0x{6,2:X2} 0x{7,2:X2}", \
-						readByteArray[0], readByteArray[1], readByteArray[2], readByteArray[3], readByteArray[4], \
-						readByteArray[5], readByteArray[6], readByteArray[7]);
-					//this->statusString->Text = Convert::ToString(sendDataChars->Length);
-					this->statusString->Text = formatedString;
-				}
-			}
-			catch (TimeoutException^) {
-				this->statusString->Text = "TimeoutRx_sendCmd";
-			}
-		}
-		catch (InvalidOperationException^) {
-			;
-		}
-	}
-	if (cmdState == "Set Pulse count") {
-		array<Byte>^ sendDataChars = gcnew array<Byte>{0x01, 0x10, 0x00, 0x05, 0x00, 0x01, 0x02, 0x00, 0x00, 0x00, 0x00};
-		try {
-			sendDataChars[7] = Convert::ToByte(motorPulseCnt >> 8);
-			sendDataChars[8] = Convert::ToByte(motorPulseCnt&0xff);
-			UInt16 temp_crc_result = CRC_Calc16(sendDataChars, sendDataChars->Length - 2);
-			this->textBoxCRC->Text = Convert::ToString(temp_crc_result,16);
-			sendDataChars[10] = (Byte)(temp_crc_result >> 8);
-			sendDataChars[9] = (Byte)(temp_crc_result & 0xff);
+				//sendDataChars[3] = 0x02;
+				sendDataChars[5] = 0x01;
+				sendDataChars[6] = 0x02;
 
-			this->_serialPort->Write(sendDataChars, 0, sendDataChars->Length);
+				if (this->radio_dirForward->Checked) {
+					sendDataChars[8] = 0x01;
+				}
+				else {
+					sendDataChars[8] = 0x00;
+				}
+				UInt16 temp_crc_result = CRC_Calc16(sendDataChars, sendDataChars->Length - 2);
+				this->textBoxCRC->Text = Convert::ToString(temp_crc_result, 16);
+				sendDataChars[9] = (Byte)(temp_crc_result & 0xff);
+				sendDataChars[10] = (Byte)(temp_crc_result >> 8);
+				this->_serialPort->Write(sendDataChars, 0, sendDataChars->Length);
+				try {
+					for (int i_rb = 0; i_rb < 8; i_rb++) {
+						readByteArray[i_rb] = this->_serialPort->ReadByte();
+					}
+					if (readByteArray[0] == 0x01) {
+						System::String^ formatedString = System::String::Format("0x{0,2:X2} 0x{1,2:X2} 0x{2,2:X2} 0x{3,2:X2} 0x{4,2:X2} 0x{5,2:X2} 0x{6,2:X2} 0x{7,2:X2}", \
+							readByteArray[0], readByteArray[1], readByteArray[2], readByteArray[3], readByteArray[4], \
+							readByteArray[5], readByteArray[6], readByteArray[7]);
+						//this->statusString->Text = Convert::ToString(sendDataChars->Length);
+						this->statusString->Text = formatedString;
+					}
+				}
+				catch (TimeoutException^) {
+					this->statusString->Text = "TimeoutRx_sendCmd";
+				}
+			}
+			catch (InvalidOperationException^) {
+				;
+			}
+		}
+		if (cmdState == "Set Speed") {
+			array<Byte>^ sendDataChars = gcnew array<Byte>{0x01, 0x10, 0x00, 0x01, 0x00, 0x01, 0x02, 0x00, 0x00, 0x00, 0x00};
 			try {
-				for (int i_rb = 0; i_rb < 8; i_rb++) {
-					readByteArray[i_rb] = this->_serialPort->ReadByte();
+				//sendDataChars[3] = 0x02;
+				sendDataChars[5] = 0x01;
+				sendDataChars[6] = 0x02;
+				sendDataChars[7] = Convert::ToByte(motorSpeed >> 8);
+				sendDataChars[8] = Convert::ToByte(motorSpeed & 0xff);
+				UInt16 temp_crc_result = CRC_Calc16(sendDataChars, sendDataChars->Length - 2);
+				this->textBoxCRC->Text = Convert::ToString(temp_crc_result, 16);
+				sendDataChars[10] = (Byte)(temp_crc_result >> 8);
+				sendDataChars[9] = (Byte)(temp_crc_result & 0xff);
+				this->_serialPort->Write(sendDataChars, 0, sendDataChars->Length);
+				try {
+					for (int i_rb = 0; i_rb < 8; i_rb++) {
+						readByteArray[i_rb] = this->_serialPort->ReadByte();
+					}
+					if (readByteArray[0] == 0x01) {
+						System::String^ formatedString = System::String::Format("0x{0,2:X2} 0x{1,2:X2} 0x{2,2:X2} 0x{3,2:X2} 0x{4,2:X2} 0x{5,2:X2} 0x{6,2:X2} 0x{7,2:X2}", \
+							readByteArray[0], readByteArray[1], readByteArray[2], readByteArray[3], readByteArray[4], \
+							readByteArray[5], readByteArray[6], readByteArray[7]);
+						//this->statusString->Text = Convert::ToString(sendDataChars->Length);
+						this->statusString->Text = formatedString;
+					}
 				}
-				if (readByteArray[0] == 0x01) {
-					System::String^ formatedString = System::String::Format("0x{0,2:X2} 0x{1,2:X2} 0x{2,2:X2} 0x{3,2:X2} 0x{4,2:X2} 0x{5,2:X2} 0x{6,2:X2} 0x{7,2:X2}", \
-						readByteArray[0], readByteArray[1], readByteArray[2], readByteArray[3], readByteArray[4], \
-						readByteArray[5], readByteArray[6], readByteArray[7]);
-					//this->statusString->Text = Convert::ToString(sendDataChars->Length);
-					this->statusString->Text = formatedString;
+				catch (TimeoutException^) {
+					this->statusString->Text = "TimeoutRx_sendCmd";
 				}
 			}
-			catch (TimeoutException^) {
-				this->statusString->Text = "TimeoutRx_sendCmd";
+			catch (InvalidOperationException^) {
+				;
 			}
 		}
-		catch (InvalidOperationException^) {
-			;
-		}
-	}
-	if (cmdState == "Set XYZ position") {
-		array<Byte>^ sendDataChars = gcnew array<Byte>{0x01, 0x10, 0x00, 0x02, 0x00, 0x03, 0x06, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};//15bytes
-		try {
-			sendDataChars[7] = Convert::ToByte(dowBoyX>>8);
-			sendDataChars[8] = Convert::ToByte(dowBoyX&0xff);
-			sendDataChars[9] = Convert::ToByte(dowBoyY >> 8);
-			sendDataChars[10] = Convert::ToByte(dowBoyY&0xff);
-			sendDataChars[11] = Convert::ToByte(dowBoyZ >> 8);
-			sendDataChars[12] = Convert::ToByte(dowBoyZ&0xff);
-			UInt16 temp_crc_result = CRC_Calc16(sendDataChars, sendDataChars->Length - 2);
-			this->textBoxCRC->Text = Convert::ToString(temp_crc_result,16);
-			sendDataChars[14] = (Byte)(temp_crc_result >> 8);
-			sendDataChars[13] = (Byte)(temp_crc_result & 0xff);
-			this->_serialPort->Write(sendDataChars, 0, sendDataChars->Length);
+		if (cmdState == "Set Pulse count") {
+			array<Byte>^ sendDataChars = gcnew array<Byte>{0x01, 0x10, 0x00, 0x05, 0x00, 0x01, 0x02, 0x00, 0x00, 0x00, 0x00};
 			try {
-				for (int i_rb = 0; i_rb < 8; i_rb++) {
-					readByteArray[i_rb] = this->_serialPort->ReadByte();
-				}
-				if (readByteArray[0] == 0x01) {
-					System::String^ formatedString = System::String::Format("0x{0,2:X2} 0x{1,2:X2} 0x{2,2:X2} 0x{3,2:X2} 0x{4,2:X2} 0x{5,2:X2} 0x{6,2:X2} 0x{7,2:X2}", \
-						readByteArray[0], readByteArray[1], readByteArray[2], readByteArray[3], readByteArray[4], \
-						readByteArray[5], readByteArray[6], readByteArray[7]);
-					//this->statusString->Text = Convert::ToString(sendDataChars->Length);
-					this->statusString->Text = formatedString;
-				}
-			}
-			catch (TimeoutException^) {
-				this->statusString->Text = "TimeoutRx_sendCmd";
-			}
-		}
-		catch (InvalidOperationException^) {
-			;
-		}
-	}
-	if (cmdState == "Set X") {
-		array<Byte>^ sendDataChars = gcnew array<Byte>{0x01, 0x10, 0x00, 0x02, 0x00, 0x01, 0x02, 0x00, 0x00, 0x00, 0x00};//11bytes
-		try {
-			sendDataChars[7] = Convert::ToByte(dowBoyX >> 8);
-			sendDataChars[8] = Convert::ToByte(dowBoyX&0xff);
+				sendDataChars[7] = Convert::ToByte(motorPulseCnt >> 8);
+				sendDataChars[8] = Convert::ToByte(motorPulseCnt & 0xff);
+				UInt16 temp_crc_result = CRC_Calc16(sendDataChars, sendDataChars->Length - 2);
+				this->textBoxCRC->Text = Convert::ToString(temp_crc_result, 16);
+				sendDataChars[10] = (Byte)(temp_crc_result >> 8);
+				sendDataChars[9] = (Byte)(temp_crc_result & 0xff);
 
-			UInt16 temp_crc_result = CRC_Calc16(sendDataChars, sendDataChars->Length - 2);
-			this->textBoxCRC->Text = Convert::ToString(temp_crc_result,16);
-			sendDataChars[10] = (Byte)(temp_crc_result >> 8);
-			sendDataChars[9] = (Byte)(temp_crc_result & 0xff);
-			this->_serialPort->Write(sendDataChars, 0, sendDataChars->Length);
+				this->_serialPort->Write(sendDataChars, 0, sendDataChars->Length);
+				try {
+					for (int i_rb = 0; i_rb < 8; i_rb++) {
+						readByteArray[i_rb] = this->_serialPort->ReadByte();
+					}
+					if (readByteArray[0] == 0x01) {
+						System::String^ formatedString = System::String::Format("0x{0,2:X2} 0x{1,2:X2} 0x{2,2:X2} 0x{3,2:X2} 0x{4,2:X2} 0x{5,2:X2} 0x{6,2:X2} 0x{7,2:X2}", \
+							readByteArray[0], readByteArray[1], readByteArray[2], readByteArray[3], readByteArray[4], \
+							readByteArray[5], readByteArray[6], readByteArray[7]);
+						//this->statusString->Text = Convert::ToString(sendDataChars->Length);
+						this->statusString->Text = formatedString;
+					}
+				}
+				catch (TimeoutException^) {
+					this->statusString->Text = "TimeoutRx_sendCmd";
+				}
+			}
+			catch (InvalidOperationException^) {
+				;
+			}
+		}
+		if (cmdState == "Set XYZ position") {
+			array<Byte>^ sendDataChars = gcnew array<Byte>{0x01, 0x10, 0x00, 0x02, 0x00, 0x03, 0x06, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};//15bytes
 			try {
-				for (int i_rb = 0; i_rb < 8; i_rb++) {
-					readByteArray[i_rb] = this->_serialPort->ReadByte();
+				sendDataChars[7] = Convert::ToByte(dowBoyX >> 8);
+				sendDataChars[8] = Convert::ToByte(dowBoyX & 0xff);
+				sendDataChars[9] = Convert::ToByte(dowBoyY >> 8);
+				sendDataChars[10] = Convert::ToByte(dowBoyY & 0xff);
+				sendDataChars[11] = Convert::ToByte(dowBoyZ >> 8);
+				sendDataChars[12] = Convert::ToByte(dowBoyZ & 0xff);
+				UInt16 temp_crc_result = CRC_Calc16(sendDataChars, sendDataChars->Length - 2);
+				this->textBoxCRC->Text = Convert::ToString(temp_crc_result, 16);
+				sendDataChars[14] = (Byte)(temp_crc_result >> 8);
+				sendDataChars[13] = (Byte)(temp_crc_result & 0xff);
+				this->_serialPort->Write(sendDataChars, 0, sendDataChars->Length);
+				try {
+					for (int i_rb = 0; i_rb < 8; i_rb++) {
+						readByteArray[i_rb] = this->_serialPort->ReadByte();
+					}
+					if (readByteArray[0] == 0x01) {
+						System::String^ formatedString = System::String::Format("0x{0,2:X2} 0x{1,2:X2} 0x{2,2:X2} 0x{3,2:X2} 0x{4,2:X2} 0x{5,2:X2} 0x{6,2:X2} 0x{7,2:X2}", \
+							readByteArray[0], readByteArray[1], readByteArray[2], readByteArray[3], readByteArray[4], \
+							readByteArray[5], readByteArray[6], readByteArray[7]);
+						//this->statusString->Text = Convert::ToString(sendDataChars->Length);
+						this->statusString->Text = formatedString;
+					}
 				}
-				if (readByteArray[0] == 0x01) {
-					System::String^ formatedString = System::String::Format("0x{0,2:X2} 0x{1,2:X2} 0x{2,2:X2} 0x{3,2:X2} 0x{4,2:X2} 0x{5,2:X2} 0x{6,2:X2} 0x{7,2:X2}", \
-						readByteArray[0], readByteArray[1], readByteArray[2], readByteArray[3], readByteArray[4], \
-						readByteArray[5], readByteArray[6], readByteArray[7]);
-					//this->statusString->Text = Convert::ToString(sendDataChars->Length);
-					this->statusString->Text = formatedString;
+				catch (TimeoutException^) {
+					this->statusString->Text = "TimeoutRx_sendCmd";
 				}
 			}
-			catch (TimeoutException^) {
-				this->statusString->Text = "TimeoutRx_sendCmd";
+			catch (InvalidOperationException^) {
+				;
 			}
 		}
-		catch (InvalidOperationException^) {
-			;
-		}
-	}
-	if (cmdState == "Set Y") {
-		array<Byte>^ sendDataChars = gcnew array<Byte>{0x01, 0x10, 0x00, 0x03, 0x00, 0x01, 0x02, 0x00, 0x00, 0x00, 0x00};//11bytes
-		try {
-			sendDataChars[7] = Convert::ToByte(dowBoyY >> 8);
-			sendDataChars[8] = Convert::ToByte(dowBoyY&0xff);
-
-			UInt16 temp_crc_result = CRC_Calc16(sendDataChars, sendDataChars->Length - 2);
-			this->textBoxCRC->Text = Convert::ToString(temp_crc_result,16);
-			sendDataChars[10] = (Byte)(temp_crc_result >> 8);
-			sendDataChars[9] = (Byte)(temp_crc_result & 0xff);
-			this->_serialPort->Write(sendDataChars, 0, sendDataChars->Length);
+		if (cmdState == "Set X") {
+			array<Byte>^ sendDataChars = gcnew array<Byte>{0x01, 0x10, 0x00, 0x02, 0x00, 0x01, 0x02, 0x00, 0x00, 0x00, 0x00};//11bytes
 			try {
-				for (int i_rb = 0; i_rb < 8; i_rb++) {
-					readByteArray[i_rb] = this->_serialPort->ReadByte();
+				sendDataChars[7] = Convert::ToByte(dowBoyX >> 8);
+				sendDataChars[8] = Convert::ToByte(dowBoyX & 0xff);
+
+				UInt16 temp_crc_result = CRC_Calc16(sendDataChars, sendDataChars->Length - 2);
+				this->textBoxCRC->Text = Convert::ToString(temp_crc_result, 16);
+				sendDataChars[10] = (Byte)(temp_crc_result >> 8);
+				sendDataChars[9] = (Byte)(temp_crc_result & 0xff);
+				this->_serialPort->Write(sendDataChars, 0, sendDataChars->Length);
+				try {
+					for (int i_rb = 0; i_rb < 8; i_rb++) {
+						readByteArray[i_rb] = this->_serialPort->ReadByte();
+					}
+					if (readByteArray[0] == 0x01) {
+						System::String^ formatedString = System::String::Format("0x{0,2:X2} 0x{1,2:X2} 0x{2,2:X2} 0x{3,2:X2} 0x{4,2:X2} 0x{5,2:X2} 0x{6,2:X2} 0x{7,2:X2}", \
+							readByteArray[0], readByteArray[1], readByteArray[2], readByteArray[3], readByteArray[4], \
+							readByteArray[5], readByteArray[6], readByteArray[7]);
+						//this->statusString->Text = Convert::ToString(sendDataChars->Length);
+						this->statusString->Text = formatedString;
+					}
 				}
-				if (readByteArray[0] == 0x01) {
-					System::String^ formatedString = System::String::Format("0x{0,2:X2} 0x{1,2:X2} 0x{2,2:X2} 0x{3,2:X2} 0x{4,2:X2} 0x{5,2:X2} 0x{6,2:X2} 0x{7,2:X2}", \
-						readByteArray[0], readByteArray[1], readByteArray[2], readByteArray[3], readByteArray[4], \
-						readByteArray[5], readByteArray[6], readByteArray[7]);
-					//this->statusString->Text = Convert::ToString(sendDataChars->Length);
-					this->statusString->Text = formatedString;
+				catch (TimeoutException^) {
+					this->statusString->Text = "TimeoutRx_sendCmd";
 				}
 			}
-			catch (TimeoutException^) {
-				this->statusString->Text = "TimeoutRx_sendCmd";
+			catch (InvalidOperationException^) {
+				;
 			}
 		}
-		catch (InvalidOperationException^) {
-			;
-		}
-	}
-	if (cmdState == "Set Z") {
-		array<Byte>^ sendDataChars = gcnew array<Byte>{0x01, 0x10, 0x00, 0x04, 0x00, 0x01, 0x02, 0x00, 0x00, 0x00, 0x00};//11bytes
-		try {
-			sendDataChars[7] = Convert::ToByte(dowBoyZ >> 8);
-			sendDataChars[8] = Convert::ToByte(dowBoyZ&0xff);
-			
-			UInt16 temp_crc_result = CRC_Calc16(sendDataChars, sendDataChars->Length - 2);
-			this->textBoxCRC->Text = Convert::ToString(temp_crc_result,16);
-			sendDataChars[10] = (Byte)(temp_crc_result >> 8);
-			sendDataChars[9] = (Byte)(temp_crc_result & 0xff);
-			this->_serialPort->Write(sendDataChars, 0, sendDataChars->Length);
+		if (cmdState == "Set Y") {
+			array<Byte>^ sendDataChars = gcnew array<Byte>{0x01, 0x10, 0x00, 0x03, 0x00, 0x01, 0x02, 0x00, 0x00, 0x00, 0x00};//11bytes
 			try {
-				for (int i_rb = 0; i_rb < 8; i_rb++) {
-					readByteArray[i_rb] = this->_serialPort->ReadByte();
-				}
-				if (readByteArray[0] == 0x01) {
-					System::String^ formatedString = System::String::Format("0x{0,2:X2} 0x{1,2:X2} 0x{2,2:X2} 0x{3,2:X2} 0x{4,2:X2} 0x{5,2:X2} 0x{6,2:X2} 0x{7,2:X2}", \
-						readByteArray[0], readByteArray[1], readByteArray[2], readByteArray[3], readByteArray[4], \
-						readByteArray[5], readByteArray[6], readByteArray[7]);
-					//this->statusString->Text = Convert::ToString(sendDataChars->Length);
-					this->statusString->Text = formatedString;
-				}
-			}
-			catch (TimeoutException^) {
-				this->statusString->Text = "TimeoutRx_sendCmd";
-			}
-		}
-		catch (InvalidOperationException^) {
-			;
-		}
-	}
-	if (cmdState == "Set Y(centered)") {
-		array<Byte>^ sendDataChars = gcnew array<Byte>{0x01, 0x10, 0x00, 0x06, 0x00, 0x01, 0x02, 0x00, 0x00, 0x00, 0x00};//11bytes
-		try {
-			sendDataChars[7] = Convert::ToByte(dowBoyYC >> 8);
-			sendDataChars[8] = Convert::ToByte(dowBoyYC & 0xff);
-			//sendDataChars[8] = dowBoyYC >> 8;
+				sendDataChars[7] = Convert::ToByte(dowBoyY >> 8);
+				sendDataChars[8] = Convert::ToByte(dowBoyY & 0xff);
 
-			UInt16 temp_crc_result = CRC_Calc16(sendDataChars, sendDataChars->Length - 2);
-			this->textBoxCRC->Text = Convert::ToString(temp_crc_result, 16);
-			sendDataChars[10] = (Byte)(temp_crc_result >> 8);
-			sendDataChars[9] = (Byte)(temp_crc_result & 0xff);
-			this->_serialPort->Write(sendDataChars, 0, sendDataChars->Length);
+				UInt16 temp_crc_result = CRC_Calc16(sendDataChars, sendDataChars->Length - 2);
+				this->textBoxCRC->Text = Convert::ToString(temp_crc_result, 16);
+				sendDataChars[10] = (Byte)(temp_crc_result >> 8);
+				sendDataChars[9] = (Byte)(temp_crc_result & 0xff);
+				this->_serialPort->Write(sendDataChars, 0, sendDataChars->Length);
+				try {
+					for (int i_rb = 0; i_rb < 8; i_rb++) {
+						readByteArray[i_rb] = this->_serialPort->ReadByte();
+					}
+					if (readByteArray[0] == 0x01) {
+						System::String^ formatedString = System::String::Format("0x{0,2:X2} 0x{1,2:X2} 0x{2,2:X2} 0x{3,2:X2} 0x{4,2:X2} 0x{5,2:X2} 0x{6,2:X2} 0x{7,2:X2}", \
+							readByteArray[0], readByteArray[1], readByteArray[2], readByteArray[3], readByteArray[4], \
+							readByteArray[5], readByteArray[6], readByteArray[7]);
+						//this->statusString->Text = Convert::ToString(sendDataChars->Length);
+						this->statusString->Text = formatedString;
+					}
+				}
+				catch (TimeoutException^) {
+					this->statusString->Text = "TimeoutRx_sendCmd";
+				}
+			}
+			catch (InvalidOperationException^) {
+				;
+			}
+		}
+		if (cmdState == "Set Z") {
+			array<Byte>^ sendDataChars = gcnew array<Byte>{0x01, 0x10, 0x00, 0x04, 0x00, 0x01, 0x02, 0x00, 0x00, 0x00, 0x00};//11bytes
 			try {
-				for (int i_rb = 0; i_rb < 8; i_rb++) {
-					readByteArray[i_rb] = this->_serialPort->ReadByte();
-				}
-				if (readByteArray[0] == 0x01) {
-					System::String^ formatedString = System::String::Format("0x{0,2:X2} 0x{1,2:X2} 0x{2,2:X2} 0x{3,2:X2} 0x{4,2:X2} 0x{5,2:X2} 0x{6,2:X2} 0x{7,2:X2}", \
-						readByteArray[0], readByteArray[1], readByteArray[2], readByteArray[3], readByteArray[4], \
-						readByteArray[5], readByteArray[6], readByteArray[7]);
-					//this->statusString->Text = Convert::ToString(sendDataChars->Length);
-					this->statusString->Text = formatedString;
-				}
-			}
-			catch (TimeoutException^) {
-				this->statusString->Text = "TimeoutRx_sendCmd";
-			}
-		}
-		catch (InvalidOperationException^) {
-			;
-		}
-	}
-	if (cmdState == "Set Z(centered)") {
-		array<Byte>^ sendDataChars = gcnew array<Byte>{0x01, 0x10, 0x00, 0x07, 0x00, 0x01, 0x02, 0x00, 0x00, 0x00, 0x00};//11bytes
-		try {
-			sendDataChars[7] = Convert::ToByte(dowBoyZC >> 8);
-			sendDataChars[8] = Convert::ToByte(dowBoyZC & 0xff);
-			//sendDataChars[8] = dowBoyYC >> 8;
+				sendDataChars[7] = Convert::ToByte(dowBoyZ >> 8);
+				sendDataChars[8] = Convert::ToByte(dowBoyZ & 0xff);
 
-			UInt16 temp_crc_result = CRC_Calc16(sendDataChars, sendDataChars->Length - 2);
-			this->textBoxCRC->Text = Convert::ToString(temp_crc_result, 16);
-			sendDataChars[10] = (Byte)(temp_crc_result >> 8);
-			sendDataChars[9] = (Byte)(temp_crc_result & 0xff);
-			this->_serialPort->Write(sendDataChars, 0, sendDataChars->Length);
+				UInt16 temp_crc_result = CRC_Calc16(sendDataChars, sendDataChars->Length - 2);
+				this->textBoxCRC->Text = Convert::ToString(temp_crc_result, 16);
+				sendDataChars[10] = (Byte)(temp_crc_result >> 8);
+				sendDataChars[9] = (Byte)(temp_crc_result & 0xff);
+				this->_serialPort->Write(sendDataChars, 0, sendDataChars->Length);
+				try {
+					for (int i_rb = 0; i_rb < 8; i_rb++) {
+						readByteArray[i_rb] = this->_serialPort->ReadByte();
+					}
+					if (readByteArray[0] == 0x01) {
+						System::String^ formatedString = System::String::Format("0x{0,2:X2} 0x{1,2:X2} 0x{2,2:X2} 0x{3,2:X2} 0x{4,2:X2} 0x{5,2:X2} 0x{6,2:X2} 0x{7,2:X2}", \
+							readByteArray[0], readByteArray[1], readByteArray[2], readByteArray[3], readByteArray[4], \
+							readByteArray[5], readByteArray[6], readByteArray[7]);
+						//this->statusString->Text = Convert::ToString(sendDataChars->Length);
+						this->statusString->Text = formatedString;
+					}
+				}
+				catch (TimeoutException^) {
+					this->statusString->Text = "TimeoutRx_sendCmd";
+				}
+			}
+			catch (InvalidOperationException^) {
+				;
+			}
+		}
+		if (cmdState == "Set Y(centered)") {
+			array<Byte>^ sendDataChars = gcnew array<Byte>{0x01, 0x10, 0x00, 0x06, 0x00, 0x01, 0x02, 0x00, 0x00, 0x00, 0x00};//11bytes
 			try {
-				for (int i_rb = 0; i_rb < 8; i_rb++) {
-					readByteArray[i_rb] = this->_serialPort->ReadByte();
+				sendDataChars[7] = (dowBoyYC >> 8);
+				sendDataChars[8] = (dowBoyYC & 0xff);
+				//sendDataChars[8] = dowBoyYC >> 8;
+
+				UInt16 temp_crc_result = CRC_Calc16(sendDataChars, sendDataChars->Length - 2);
+				this->textBoxCRC->Text = Convert::ToString(temp_crc_result, 16);
+				sendDataChars[10] = (Byte)(temp_crc_result >> 8);
+				sendDataChars[9] = (Byte)(temp_crc_result & 0xff);
+				this->_serialPort->Write(sendDataChars, 0, sendDataChars->Length);
+				try {
+					for (int i_rb = 0; i_rb < 8; i_rb++) {
+						readByteArray[i_rb] = this->_serialPort->ReadByte();
+					}
+					if (readByteArray[0] == 0x01) {
+						System::String^ formatedString = System::String::Format("0x{0,2:X2} 0x{1,2:X2} 0x{2,2:X2} 0x{3,2:X2} 0x{4,2:X2} 0x{5,2:X2} 0x{6,2:X2} 0x{7,2:X2}", \
+							readByteArray[0], readByteArray[1], readByteArray[2], readByteArray[3], readByteArray[4], \
+							readByteArray[5], readByteArray[6], readByteArray[7]);
+						//this->statusString->Text = Convert::ToString(sendDataChars->Length);
+						this->statusString->Text = formatedString;
+					}
 				}
-				if (readByteArray[0] == 0x01) {
-					System::String^ formatedString = System::String::Format("0x{0,2:X2} 0x{1,2:X2} 0x{2,2:X2} 0x{3,2:X2} 0x{4,2:X2} 0x{5,2:X2} 0x{6,2:X2} 0x{7,2:X2}", \
-						readByteArray[0], readByteArray[1], readByteArray[2], readByteArray[3], readByteArray[4], \
-						readByteArray[5], readByteArray[6], readByteArray[7]);
-					//this->statusString->Text = Convert::ToString(sendDataChars->Length);
-					this->statusString->Text = formatedString;
+				catch (TimeoutException^) {
+					this->statusString->Text = "TimeoutRx_sendCmd";
 				}
 			}
-			catch (TimeoutException^) {
-				this->statusString->Text = "TimeoutRx_sendCmd";
+			catch (InvalidOperationException^) {
+				;
 			}
 		}
-		catch (InvalidOperationException^) {
-			;
+		if (cmdState == "Set Z(centered)") {
+			array<Byte>^ sendDataChars = gcnew array<Byte>{0x01, 0x10, 0x00, 0x07, 0x00, 0x01, 0x02, 0x00, 0x00, 0x00, 0x00};//11bytes
+			try {
+				sendDataChars[7] = (dowBoyZC >> 8);
+				sendDataChars[8] = (dowBoyZC & 0xff);
+				//sendDataChars[8] = dowBoyYC >> 8;
+
+				UInt16 temp_crc_result = CRC_Calc16(sendDataChars, sendDataChars->Length - 2);
+				this->textBoxCRC->Text = Convert::ToString(temp_crc_result, 16);
+				sendDataChars[10] = (Byte)(temp_crc_result >> 8);
+				sendDataChars[9] = (Byte)(temp_crc_result & 0xff);
+				this->_serialPort->Write(sendDataChars, 0, sendDataChars->Length);
+				try {
+					for (int i_rb = 0; i_rb < 8; i_rb++) {
+						readByteArray[i_rb] = this->_serialPort->ReadByte();
+					}
+					if (readByteArray[0] == 0x01) {
+						System::String^ formatedString = System::String::Format("0x{0,2:X2} 0x{1,2:X2} 0x{2,2:X2} 0x{3,2:X2} 0x{4,2:X2} 0x{5,2:X2} 0x{6,2:X2} 0x{7,2:X2}", \
+							readByteArray[0], readByteArray[1], readByteArray[2], readByteArray[3], readByteArray[4], \
+							readByteArray[5], readByteArray[6], readByteArray[7]);
+						//this->statusString->Text = Convert::ToString(sendDataChars->Length);
+						this->statusString->Text = formatedString;
+					}
+				}
+				catch (TimeoutException^) {
+					this->statusString->Text = "TimeoutRx_sendCmd";
+				}
+			}
+			catch (InvalidOperationException^) {
+				;
+			}
+
+		}
+
+		//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		///!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		//start
+		//Set mm(X)
+		if (cmdState == "Set mm(X)") {
+			array<Byte>^ sendDataChars = gcnew array<Byte>{0x01, 0x10, 0x00, 0x0A, 0x00, 0x01, 0x02, 0x00, 0x00, 0x00, 0x00};//11bytes
+			try {
+				sendDataChars[7] = (dowBoyX >> 8);
+				sendDataChars[8] = (dowBoyX & 0xff);
+				//sendDataChars[8] = dowBoyYC >> 8;
+
+				UInt16 temp_crc_result = CRC_Calc16(sendDataChars, sendDataChars->Length - 2);
+				this->textBoxCRC->Text = Convert::ToString(temp_crc_result, 16);
+				sendDataChars[10] = (Byte)(temp_crc_result >> 8);
+				sendDataChars[9] = (Byte)(temp_crc_result & 0xff);
+				this->_serialPort->Write(sendDataChars, 0, sendDataChars->Length);
+				try {
+					for (int i_rb = 0; i_rb < 8; i_rb++) {
+						readByteArray[i_rb] = this->_serialPort->ReadByte();
+					}
+					if (readByteArray[0] == 0x01) {
+						System::String^ formatedString = System::String::Format("0x{0,2:X2} 0x{1,2:X2} 0x{2,2:X2} 0x{3,2:X2} 0x{4,2:X2} 0x{5,2:X2} 0x{6,2:X2} 0x{7,2:X2}", \
+							readByteArray[0], readByteArray[1], readByteArray[2], readByteArray[3], readByteArray[4], \
+							readByteArray[5], readByteArray[6], readByteArray[7]);
+						//this->statusString->Text = Convert::ToString(sendDataChars->Length);
+						this->statusString->Text = formatedString;
+					}
+				}
+				catch (TimeoutException^) {
+					this->statusString->Text = "TimeoutRx_sendCmd";
+				}
+			}
+			catch (InvalidOperationException^) {
+				;
+			}
+		}
+		//Set mm(Y)
+		if (cmdState == "Set mm(Y)") {
+			array<Byte>^ sendDataChars = gcnew array<Byte>{0x01, 0x10, 0x00, 0x0B, 0x00, 0x01, 0x02, 0x00, 0x00, 0x00, 0x00};//11bytes
+			try {
+				sendDataChars[7] = (dowBoyYC >> 8);
+				sendDataChars[8] = (dowBoyYC & 0xff);
+				//sendDataChars[8] = dowBoyYC >> 8;
+
+				UInt16 temp_crc_result = CRC_Calc16(sendDataChars, sendDataChars->Length - 2);
+				this->textBoxCRC->Text = Convert::ToString(temp_crc_result, 16);
+				sendDataChars[10] = (Byte)(temp_crc_result >> 8);
+				sendDataChars[9] = (Byte)(temp_crc_result & 0xff);
+				this->_serialPort->Write(sendDataChars, 0, sendDataChars->Length);
+				try {
+					for (int i_rb = 0; i_rb < 8; i_rb++) {
+						readByteArray[i_rb] = this->_serialPort->ReadByte();
+					}
+					if (readByteArray[0] == 0x01) {
+						System::String^ formatedString = System::String::Format("0x{0,2:X2} 0x{1,2:X2} 0x{2,2:X2} 0x{3,2:X2} 0x{4,2:X2} 0x{5,2:X2} 0x{6,2:X2} 0x{7,2:X2}", \
+							readByteArray[0], readByteArray[1], readByteArray[2], readByteArray[3], readByteArray[4], \
+							readByteArray[5], readByteArray[6], readByteArray[7]);
+						//this->statusString->Text = Convert::ToString(sendDataChars->Length);
+						this->statusString->Text = formatedString;
+					}
+				}
+				catch (TimeoutException^) {
+					this->statusString->Text = "TimeoutRx_sendCmd";
+				}
+			}
+			catch (InvalidOperationException^) {
+				;
+			}
+		}
+		//Set mm(Z)
+		if (cmdState == "Set mm(Z)") {
+			array<Byte>^ sendDataChars = gcnew array<Byte>{0x01, 0x10, 0x00, 0x0C, 0x00, 0x01, 0x02, 0x00, 0x00, 0x00, 0x00};//11bytes
+			try {
+				sendDataChars[7] = (dowBoyZC >> 8);
+				sendDataChars[8] = (dowBoyZC & 0xff);
+				//sendDataChars[8] = dowBoyYC >> 8;
+
+				UInt16 temp_crc_result = CRC_Calc16(sendDataChars, sendDataChars->Length - 2);
+				this->textBoxCRC->Text = Convert::ToString(temp_crc_result, 16);
+				sendDataChars[10] = (Byte)(temp_crc_result >> 8);
+				sendDataChars[9] = (Byte)(temp_crc_result & 0xff);
+				this->_serialPort->Write(sendDataChars, 0, sendDataChars->Length);
+				try {
+					for (int i_rb = 0; i_rb < 8; i_rb++) {
+						readByteArray[i_rb] = this->_serialPort->ReadByte();
+					}
+					if (readByteArray[0] == 0x01) {
+						System::String^ formatedString = System::String::Format("0x{0,2:X2} 0x{1,2:X2} 0x{2,2:X2} 0x{3,2:X2} 0x{4,2:X2} 0x{5,2:X2} 0x{6,2:X2} 0x{7,2:X2}", \
+							readByteArray[0], readByteArray[1], readByteArray[2], readByteArray[3], readByteArray[4], \
+							readByteArray[5], readByteArray[6], readByteArray[7]);
+						//this->statusString->Text = Convert::ToString(sendDataChars->Length);
+						this->statusString->Text = formatedString;
+					}
+				}
+				catch (TimeoutException^) {
+					this->statusString->Text = "TimeoutRx_sendCmd";
+				}
+			}
+			catch (InvalidOperationException^) {
+				;
+			}
+		}
+		if (cmdState == "Set mm(XYZ)") {
+			array<Byte>^ sendDataChars = gcnew array<Byte>{0x01, 0x10, 0x00, 0x0A, 0x00, 0x03, 0x06, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};//15bytes
+			try {
+				sendDataChars[7] = Convert::ToByte(dowBoyX >> 8);
+				sendDataChars[8] = Convert::ToByte(dowBoyX & 0xff);
+				sendDataChars[9] = Convert::ToByte(dowBoyYC >> 8);
+				sendDataChars[10] = Convert::ToByte(dowBoyYC & 0xff);
+				sendDataChars[11] = Convert::ToByte(dowBoyZC >> 8);
+				sendDataChars[12] = Convert::ToByte(dowBoyZC & 0xff);
+				UInt16 temp_crc_result = CRC_Calc16(sendDataChars, sendDataChars->Length - 2);
+				this->textBoxCRC->Text = Convert::ToString(temp_crc_result, 16);
+				sendDataChars[14] = (Byte)(temp_crc_result >> 8);
+				sendDataChars[13] = (Byte)(temp_crc_result & 0xff);
+				this->_serialPort->Write(sendDataChars, 0, sendDataChars->Length);
+				try {
+					for (int i_rb = 0; i_rb < 8; i_rb++) {
+						readByteArray[i_rb] = this->_serialPort->ReadByte();
+					}
+					if (readByteArray[0] == 0x01) {
+						System::String^ formatedString = System::String::Format("0x{0,2:X2} 0x{1,2:X2} 0x{2,2:X2} 0x{3,2:X2} 0x{4,2:X2} 0x{5,2:X2} 0x{6,2:X2} 0x{7,2:X2}", \
+							readByteArray[0], readByteArray[1], readByteArray[2], readByteArray[3], readByteArray[4], \
+							readByteArray[5], readByteArray[6], readByteArray[7]);
+						//this->statusString->Text = Convert::ToString(sendDataChars->Length);
+						this->statusString->Text = formatedString;
+					}
+				}
+				catch (TimeoutException^) {
+					this->statusString->Text = "TimeoutRx_sendCmd";
+				}
+			}
+			catch (InvalidOperationException^) {
+				;
+			}
+		}
+		//end
+		//
+		//****************************
+		//
+	}
+	private: System::Void TextBoxSpeed_TextChanged(System::Object^ sender, System::EventArgs^ e) {
+		try {
+			motorSpeed = Convert::ToUInt32(this->textBoxSpeed->Text);
+
+		}
+		catch (FormatException^) {
+			this->statusString->Text = "only numbers";
+			this->textBoxSpeed->Text = "0";
+			motorSpeed = 0;
+		}
+		catch (OverflowException^) {
+			this->statusString->Text = "to large value";
+			this->textBoxSpeed->Text = "65535";
+			motorSpeed = 65535;
 		}
 	}
-}
-private: System::Void TextBoxSpeed_TextChanged(System::Object^ sender, System::EventArgs^ e) {
-	try {
-		motorSpeed = Convert::ToUInt32(this->textBoxSpeed->Text);
+	private: System::Void TextBoxPulse_TextChanged(System::Object^ sender, System::EventArgs^ e) {
+		try {
+			motorPulseCnt = Convert::ToUInt32(this->textBoxPulse->Text);
+		}
+		catch (FormatException^) {
+			this->statusString->Text = "only numbers";
+			this->textBoxPulse->Text = "0";
+			motorPulseCnt = 0;
+		}
+		catch (OverflowException^) {
+			this->statusString->Text = "to large value";
+			this->textBoxPulse->Text = "65535";
+			motorPulseCnt = 65535;
+		}
+	}
+	private: System::Void TextBoxX_TextChanged(System::Object^ sender, System::EventArgs^ e) {
+		try {
+			dowBoyX = Convert::ToUInt16(this->textBoxX->Text);
+			this->statusString->Text = "X pos changed";
+		}
+		catch (FormatException^) {
+			this->statusString->Text = "only numbers";
+			this->textBoxX->Text = "0";
+			dowBoyX = 0;
+		}
+		catch (OverflowException^) {
+			this->statusString->Text = "to large value";
+			this->textBoxX->Text = "65535";
+			dowBoyX = 65535;
+		}
 
 	}
-	catch (FormatException^) {
-		this->statusString->Text = "only numbers";
-		this->textBoxSpeed->Text = "0";
-		motorSpeed = 0;
-	}
-	catch (OverflowException^) {
-		this->statusString->Text = "to large value";
-		this->textBoxSpeed->Text = "65535";
-		motorSpeed = 65535;
-	}
-}
-private: System::Void TextBoxPulse_TextChanged(System::Object^ sender, System::EventArgs^ e) {
-	try {
-		motorPulseCnt = Convert::ToUInt32(this->textBoxPulse->Text);
-	}
-	catch (FormatException^) {
-		this->statusString->Text = "only numbers";
-		this->textBoxPulse->Text = "0";
-		motorPulseCnt = 0;
-	}
-	catch (OverflowException^) {
-		this->statusString->Text = "to large value";
-		this->textBoxPulse->Text = "65535";
-		motorPulseCnt = 65535;
-	}
-}
-private: System::Void TextBoxX_TextChanged(System::Object^ sender, System::EventArgs^ e) {
-	try {
-		dowBoyX = Convert::ToUInt16(this->textBoxX->Text);
-		this->statusString->Text = "X pos changed";
-	}
-	catch (FormatException^) {
-		this->statusString->Text = "only numbers";
-		this->textBoxX->Text = "0";
-		dowBoyX = 0;
-	}
-	catch (OverflowException^) {
-		this->statusString->Text = "to large value";
-		this->textBoxX->Text = "65535";
-		dowBoyX = 65535;
-	}
+	private: System::Void TextBoxX_EnterPressed(System::Object^ sender, KeyEventArgs^ e) {
+		if (e->KeyCode == Keys::Enter) {
+			this->textBoxY->Focus();
+		}
+		if (e->KeyCode == Keys::Up) {
+			try {
+				dowBoyX = Convert::ToUInt16(this->textBoxX->Text);
+				dowBoyX += 1;
+				this->textBoxX->Text = Convert::ToString(dowBoyX);
+			}
+			catch (FormatException^) {
+				this->statusString->Text = "only numbers";
+				this->textBoxX->Text = "0";
+				dowBoyX = 0;
+			}
+			catch (OverflowException^) {
+				this->statusString->Text = "to large value";
+				this->textBoxX->Text = "2000";
+				dowBoyX = 2000;
+			}
+		}
+		if (e->KeyCode == Keys::Down) {
+			try {
+				dowBoyX = Convert::ToUInt16(this->textBoxX->Text);
+				if(dowBoyX != 0)dowBoyX -= 1;
+				this->textBoxX->Text = Convert::ToString(dowBoyX);
+			}
+			catch (FormatException^) {
+				this->statusString->Text = "only numbers";
+				this->textBoxX->Text = "0";
+				dowBoyX = 0;
+			}
+			catch (OverflowException^) {
+				this->statusString->Text = "to large value";
+				this->textBoxX->Text = "2000";
+				dowBoyX = 2000;
+			}
+		}
 
-}
-private: System::Void TextBoxY_TextChanged(System::Object^ sender, System::EventArgs^ e) {
-	try {
-		dowBoyY = Convert::ToUInt16(this->textBoxY->Text);
-		this->statusString->Text = "Y pos changed";
 	}
-	catch (FormatException^) {
-		this->statusString->Text = "only numbers";
-		this->textBoxY->Text = "0";
-		dowBoyY = 0;
-	}
-	catch (OverflowException^) {
-		this->statusString->Text = "to large value";
-		this->textBoxY->Text = "65535";
-		dowBoyY = 65535;
-	}
+	private: System::Void TextBoxY_EnterPressed(System::Object^ sender, KeyPressEventArgs^ e) {
+		if (e->KeyChar == char(13)) {
+			this->textBoxZ->Focus();
+		}
 
-}
-private: System::Void TextBoxZ_TextChanged(System::Object^ sender, System::EventArgs^ e) {
-	try {
-		dowBoyZ = Convert::ToUInt16(this->textBoxZ->Text);
-		this->statusString->Text = "Z pos changed";
 	}
-	catch (FormatException^) {
-		this->statusString->Text = "only numbers";
-		this->textBoxZ->Text = "0";
-		dowBoyZ = 0;
+	private: System::Void TextBoxZ_EnterPressed(System::Object^ sender, KeyPressEventArgs^ e) {
+		if (e->KeyChar == char(13)) {
+			this->textBoxYC->Focus();
+		}
 	}
-	catch (OverflowException^) {
-		this->statusString->Text = "to large value";
-		this->textBoxZ->Text = "65535";
-		dowBoyZ = 65535;
+	private: System::Void TextBoxYC_EnterPressed(System::Object^ sender, KeyPressEventArgs^ e) {
+		if (e->KeyChar == char(13)) {
+			this->textBoxZC->Focus();
+		}
 	}
+	private: System::Void TextBoxZC_EnterPressed(System::Object^ sender, KeyPressEventArgs^ e) {
+		if (e->KeyChar == char(13)) {
+			this->textBoxX->Focus();
+		}
+	}
+	private: System::Void TextBoxY_TextChanged(System::Object^ sender, System::EventArgs^ e) {
+		try {
+			dowBoyY = Convert::ToUInt16(this->textBoxY->Text);
+			this->statusString->Text = "Y pos changed";
+		}
+		catch (FormatException^) {
+			this->statusString->Text = "only numbers";
+			this->textBoxY->Text = "0";
+			dowBoyY = 0;
+		}
+		catch (OverflowException^) {
+			this->statusString->Text = "to large value";
+			this->textBoxY->Text = "65535";
+			dowBoyY = 65535;
+		}
 
-}
-private: System::Void TextBoxYC_TextChanged(System::Object^ sender, System::EventArgs^ e) {
-	try {
-		dowBoyYC = Convert::ToInt16(this->textBoxYC->Text);
-		if (dowBoyYC > 900) {
-			dowBoyYC = 900;
+	}
+	private: System::Void TextBoxZ_TextChanged(System::Object^ sender, System::EventArgs^ e) {
+		try {
+			dowBoyZ = Convert::ToUInt16(this->textBoxZ->Text);
+			this->statusString->Text = "Z pos changed";
+		}
+		catch (FormatException^) {
+			this->statusString->Text = "only numbers";
+			this->textBoxZ->Text = "0";
+			dowBoyZ = 0;
+		}
+		catch (OverflowException^) {
+			this->statusString->Text = "to large value";
+			this->textBoxZ->Text = "65535";
+			dowBoyZ = 65535;
+		}
+
+	}
+	private: System::Void TextBoxYC_TextChanged(System::Object^ sender, System::EventArgs^ e) {
+		try {
+			dowBoyYC = Convert::ToInt16(this->textBoxYC->Text);
+			if (dowBoyYC > 900) {
+				dowBoyYC = 900;
+				this->textBoxYC->Text = "900";
+			}
+			if (dowBoyYC < -900) {
+				dowBoyYC = -900;
+				this->textBoxYC->Text = "-900";
+			}
+			//this->statusString->Text = "Z pos changed";
+		}
+		catch (FormatException^) {
+			this->statusString->Text = "only numbers";
+			this->textBoxYC->Text = "0";
+			dowBoyYC = 0;
+		}
+		catch (OverflowException^) {
+			//this->statusString->Text = "to large value";
 			this->textBoxYC->Text = "900";
+			dowBoyYC = 900;
 		}
-		if (dowBoyYC < -900) {
-			dowBoyYC = -900;
-			this->textBoxYC->Text = "-900";
+	}
+	private: System::Void TextBoxZC_TextChanged(System::Object^ sender, System::EventArgs^ e) {
+		try {
+			dowBoyZC = Convert::ToInt16(this->textBoxZC->Text);
+			if (dowBoyZC > 900) {
+				dowBoyZC = 900;
+				this->textBoxZC->Text = "900";
+			}
+			if (dowBoyZC < -900) {
+				dowBoyZC = -900;
+				this->textBoxZC->Text = "-900";
+			}
+			//this->statusString->Text = "Z pos changed";
 		}
-		//this->statusString->Text = "Z pos changed";
-	}
-	catch (FormatException^) {
-		this->statusString->Text = "only numbers";
-		this->textBoxYC->Text = "0";
-		dowBoyYC = 0;
-	}
-	catch (OverflowException^) {
-		//this->statusString->Text = "to large value";
-		this->textBoxYC->Text = "900";
-		dowBoyYC = 900;
-	}
-}
-private: System::Void TextBoxZC_TextChanged(System::Object^ sender, System::EventArgs^ e) {
-	try {
-		dowBoyZC = Convert::ToInt16(this->textBoxZC->Text);
-		if (dowBoyZC > 900) {
-			dowBoyZC = 900;
+		catch (FormatException^) {
+			this->statusString->Text = "only numbers";
+			this->textBoxZC->Text = "0";
+			dowBoyZC = 0;
+		}
+		catch (OverflowException^) {
+			//this->statusString->Text = "to large value";
 			this->textBoxZC->Text = "900";
+			dowBoyZC = 900;
 		}
-		if (dowBoyZC < -900) {
-			dowBoyZC = -900;
-			this->textBoxZC->Text = "-900";
+	}
+	private: System::UInt16 CRC_Calc16(array<Byte>^ dataArray, int length) {//array<Byte>^  //Byte *dataArray
+		UInt16 crc = 0xffff;
+		UInt16 table_result = 0;
+		for (int i_crc = 0; i_crc < length; i_crc++) {
+			crc = (crc >> 8) ^ crcTable[(crc ^ dataArray[i_crc]) & 0xff];
 		}
-		//this->statusString->Text = "Z pos changed";
+		return crc;
 	}
-	catch (FormatException^) {
-		this->statusString->Text = "only numbers";
-		this->textBoxZC->Text = "0";
-		dowBoyZC = 0;
+	private: System::Void ComboBoxAddress_SelectedIndexChanged(System::Object^ sender, System::EventArgs^ e) {
+
+		netAddress = Convert::ToUInt16(this->comboBoxAddress->Text);
+
 	}
-	catch (OverflowException^) {
-		//this->statusString->Text = "to large value";
-		this->textBoxZC->Text = "900";
-		dowBoyZC = 900;
+	private: System::Void ButtonImageUpdate_Click(System::Object^ sender, System::EventArgs^ e) {
+
+
+		//IntPtr hBitmap = bm->GetHbitmap(Color::Blue);
+		//this->pictureBox1->Image = //imageArray;
+
+		//this->pictureBox1->Image = bm;//Bitmap::FromHbitmap(hBitmap);
+
+
+		cv::Mat image;
+		image = cv::imread("D:\\Python\\ex2.png", cv::IMREAD_COLOR);
+		//cv::namedWindow("Image", cv::WINDOW_AUTOSIZE);
+		//cv::imshow("Display image", image);
+
+		//HBITMAP hBit;
+		//hBit = CreateBitmap(image.cols, image.rows, 1, 32, image.data);
+		//Bitmap^ bmp = Bitmap::FromHbitmap((IntPtr)hBit);
+		//this->pictureBox1->Image = image;
+
+		if (image.data != NULL) {
+
+			System::Drawing::Graphics^ graphics = pictureBox1->CreateGraphics();
+			System::IntPtr ptr(image.ptr());
+			System::Drawing::Bitmap^ b = gcnew System::Drawing::Bitmap(image.cols, image.rows, image.step, System::Drawing::Imaging::PixelFormat::Format24bppRgb, ptr);
+			System::Drawing::RectangleF rect(0, 0, pictureBox1->Width, pictureBox1->Height);
+			graphics->DrawImage(b, rect);
+
+			this->timer1->Enabled = true;
+		}
+
+
+
 	}
-}
-private: System::UInt16 CRC_Calc16(array<Byte>^ dataArray, int length) {//array<Byte>^  //Byte *dataArray
-	 UInt16 crc = 0xffff;
-	 UInt16 table_result = 0;
-	 for (int i_crc = 0; i_crc < length; i_crc++) {
-		 crc = (crc >> 8) ^ crcTable[(crc^dataArray[i_crc]) & 0xff];
-	 }
-	 return crc;
-}
-private: System::Void ComboBoxAddress_SelectedIndexChanged(System::Object^ sender, System::EventArgs^ e) {
+	private: System::Void Timer1_Tick(System::Object^ sender, System::EventArgs^ e) {
+		cv::Mat image;
 
-	netAddress = Convert::ToUInt16(this->comboBoxAddress->Text);
+		imageOrder++;
+		if (imageOrder >= 11)imageOrder = 1;
 
-}
-private: System::Void ButtonImageUpdate_Click(System::Object^ sender, System::EventArgs^ e) {
+		cv::String filenameString = cv::format("D:\\VSprojects\\ConsoleSerial\\pictures\\d2_%d.png", imageOrder);//"d2_{d}.png"->Format(imageOrder);
+		//cv::String filenameString = "D:\\VSprojects\\ConsoleSerial\\pictures\\d2_.png";
 
-
-	//IntPtr hBitmap = bm->GetHbitmap(Color::Blue);
-	//this->pictureBox1->Image = //imageArray;
-	
-	//this->pictureBox1->Image = bm;//Bitmap::FromHbitmap(hBitmap);
-
-	
-	cv::Mat image;
-	image = cv::imread("D:\\Python\\ex2.png", cv::IMREAD_COLOR);
-	//cv::namedWindow("Image", cv::WINDOW_AUTOSIZE);
-	//cv::imshow("Display image", image);
-
-	//HBITMAP hBit;
-	//hBit = CreateBitmap(image.cols, image.rows, 1, 32, image.data);
-	//Bitmap^ bmp = Bitmap::FromHbitmap((IntPtr)hBit);
-	//this->pictureBox1->Image = image;
-
-	if (image.data != NULL) {
+		//image = cv::imread("D:\\VSprojects\\ConsoleSerial\\pictures\\d2_1.png", cv::IMREAD_COLOR);
+		image = cv::imread(filenameString, cv::IMREAD_COLOR);
 
 		System::Drawing::Graphics^ graphics = pictureBox1->CreateGraphics();
 		System::IntPtr ptr(image.ptr());
@@ -1184,32 +1430,8 @@ private: System::Void ButtonImageUpdate_Click(System::Object^ sender, System::Ev
 		System::Drawing::RectangleF rect(0, 0, pictureBox1->Width, pictureBox1->Height);
 		graphics->DrawImage(b, rect);
 
-		this->timer1->Enabled = true;
 	}
-	
 
 
-}
-private: System::Void Timer1_Tick(System::Object^ sender, System::EventArgs^ e) {
-	cv::Mat image;
-	
-	imageOrder++;
-	if (imageOrder >= 11)imageOrder = 1;
-	
-	cv::String filenameString = cv::format("D:\\VSprojects\\ConsoleSerial\\pictures\\d2_%d.png", imageOrder);//"d2_{d}.png"->Format(imageOrder);
-	//cv::String filenameString = "D:\\VSprojects\\ConsoleSerial\\pictures\\d2_.png";
-	
-	//image = cv::imread("D:\\VSprojects\\ConsoleSerial\\pictures\\d2_1.png", cv::IMREAD_COLOR);
-	image = cv::imread(filenameString, cv::IMREAD_COLOR);
-
-	System::Drawing::Graphics^ graphics = pictureBox1->CreateGraphics();
-	System::IntPtr ptr(image.ptr());
-	System::Drawing::Bitmap^ b = gcnew System::Drawing::Bitmap(image.cols, image.rows, image.step, System::Drawing::Imaging::PixelFormat::Format24bppRgb, ptr);
-	System::Drawing::RectangleF rect(0, 0, pictureBox1->Width, pictureBox1->Height);
-	graphics->DrawImage(b, rect);
-
-}
-
-
-};
+	};
 }
