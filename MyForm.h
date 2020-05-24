@@ -1,10 +1,10 @@
 ﻿#include <string>
 #include <array>
 #include <iostream>
-#include <opencv2/core.hpp>
-#include <opencv2/highgui/highgui.hpp>
-#pragma once
 
+#pragma once
+// <opencv2/core.hpp>
+// <opencv2/highgui/highgui.hpp>
 namespace SerialApp {
 
 	using namespace System;
@@ -33,6 +33,7 @@ namespace SerialApp {
 		UInt16 dowBoyZ = 0;
 		Int16 dowBoyYC = 0;
 		Int16 dowBoyZC = 0;
+		UInt16 dowBoyD8 = 0;
 		UInt16 netAddress = 1;
 		//Bitmap^ bm = gcnew Bitmap("frame_mf_2148.png");
 
@@ -45,10 +46,12 @@ namespace SerialApp {
 	private: System::Windows::Forms::PictureBox^ pictureBox1;
 	private: System::Windows::Forms::Button^ buttonImageUpdate;
 	private: System::Windows::Forms::Timer^ timer1;
+	private: System::Windows::Forms::TextBox^ textBoxD8;
 	private: System::Windows::Forms::Label^ label4;
-	private: System::Windows::Forms::Label^ label5;
-	private: System::Windows::Forms::TextBox^ textBoxYC;
-	private: System::Windows::Forms::TextBox^ textBoxZC;
+
+
+
+
 
 
 		   static array<UInt16>^ crcTable = gcnew array<UInt16>{
@@ -128,17 +131,17 @@ namespace SerialApp {
 	private: System::Windows::Forms::TextBox^ textBoxSpeed;
 
 	private: System::Windows::Forms::Label^ labelParam1;
-	private: System::Windows::Forms::Label^ labelParam2;
-	private: System::Windows::Forms::TextBox^ textBoxPulse;
+
+
 
 	private: System::Windows::Forms::Button^ buttonSend;
 
 	private: System::IO::Ports::SerialPort^ serialPort1;
-	private: System::Windows::Forms::TextBox^ textBoxRX;
 
-	private: System::Windows::Forms::TextBox^ textBoxTX;
 
-	private: System::Windows::Forms::Button^ buttonSendCustom;
+
+
+
 	private: System::Windows::Forms::TextBox^ textBoxX;
 
 
@@ -153,8 +156,8 @@ namespace SerialApp {
 	private: System::Windows::Forms::TextBox^ textBoxZ;
 
 
-	private: System::Windows::Forms::RadioButton^ radio_dirForward;
-	private: System::Windows::Forms::RadioButton^ radio_dirReverse;
+
+
 	private: System::Windows::Forms::TextBox^ statusString;
 
 
@@ -180,13 +183,8 @@ namespace SerialApp {
 			this->label1 = (gcnew System::Windows::Forms::Label());
 			this->textBoxSpeed = (gcnew System::Windows::Forms::TextBox());
 			this->labelParam1 = (gcnew System::Windows::Forms::Label());
-			this->labelParam2 = (gcnew System::Windows::Forms::Label());
-			this->textBoxPulse = (gcnew System::Windows::Forms::TextBox());
 			this->buttonSend = (gcnew System::Windows::Forms::Button());
 			this->serialPort1 = (gcnew System::IO::Ports::SerialPort(this->components));
-			this->textBoxRX = (gcnew System::Windows::Forms::TextBox());
-			this->textBoxTX = (gcnew System::Windows::Forms::TextBox());
-			this->buttonSendCustom = (gcnew System::Windows::Forms::Button());
 			this->textBoxX = (gcnew System::Windows::Forms::TextBox());
 			this->X_ax_label = (gcnew System::Windows::Forms::Label());
 			this->comboBoxCMD = (gcnew System::Windows::Forms::ComboBox());
@@ -195,8 +193,6 @@ namespace SerialApp {
 			this->Z_ax_label = (gcnew System::Windows::Forms::Label());
 			this->textBoxY = (gcnew System::Windows::Forms::TextBox());
 			this->textBoxZ = (gcnew System::Windows::Forms::TextBox());
-			this->radio_dirForward = (gcnew System::Windows::Forms::RadioButton());
-			this->radio_dirReverse = (gcnew System::Windows::Forms::RadioButton());
 			this->statusString = (gcnew System::Windows::Forms::TextBox());
 			this->textBoxCRC = (gcnew System::Windows::Forms::TextBox());
 			this->comboBoxAddress = (gcnew System::Windows::Forms::ComboBox());
@@ -204,10 +200,8 @@ namespace SerialApp {
 			this->pictureBox1 = (gcnew System::Windows::Forms::PictureBox());
 			this->buttonImageUpdate = (gcnew System::Windows::Forms::Button());
 			this->timer1 = (gcnew System::Windows::Forms::Timer(this->components));
+			this->textBoxD8 = (gcnew System::Windows::Forms::TextBox());
 			this->label4 = (gcnew System::Windows::Forms::Label());
-			this->label5 = (gcnew System::Windows::Forms::Label());
-			this->textBoxYC = (gcnew System::Windows::Forms::TextBox());
-			this->textBoxZC = (gcnew System::Windows::Forms::TextBox());
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->pictureBox1))->BeginInit();
 			this->SuspendLayout();
 			// 
@@ -216,9 +210,9 @@ namespace SerialApp {
 			this->comboBox_comportList->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
 			this->comboBox_comportList->FlatStyle = System::Windows::Forms::FlatStyle::System;
 			this->comboBox_comportList->FormattingEnabled = true;
-			this->comboBox_comportList->Location = System::Drawing::Point(87, 29);
+			this->comboBox_comportList->Location = System::Drawing::Point(14, 46);
 			this->comboBox_comportList->Name = L"comboBox_comportList";
-			this->comboBox_comportList->Size = System::Drawing::Size(102, 21);
+			this->comboBox_comportList->Size = System::Drawing::Size(68, 21);
 			this->comboBox_comportList->TabIndex = 0;
 			this->comboBox_comportList->TabStop = false;
 			this->comboBox_comportList->DropDown += gcnew System::EventHandler(this, &MyForm::ComboBox_comportList_SelectedIndexChanged_DropDown);
@@ -231,9 +225,9 @@ namespace SerialApp {
 			this->btn_connect->FlatAppearance->MouseDownBackColor = System::Drawing::Color::Black;
 			this->btn_connect->FlatAppearance->MouseOverBackColor = System::Drawing::Color::Black;
 			this->btn_connect->FlatStyle = System::Windows::Forms::FlatStyle::System;
-			this->btn_connect->Location = System::Drawing::Point(195, 16);
+			this->btn_connect->Location = System::Drawing::Point(87, 34);
 			this->btn_connect->Name = L"btn_connect";
-			this->btn_connect->Size = System::Drawing::Size(82, 34);
+			this->btn_connect->Size = System::Drawing::Size(57, 32);
 			this->btn_connect->TabIndex = 1;
 			this->btn_connect->TabStop = false;
 			this->btn_connect->Text = L"Connect";
@@ -246,7 +240,7 @@ namespace SerialApp {
 			this->label1->FlatStyle = System::Windows::Forms::FlatStyle::System;
 			this->label1->Font = (gcnew System::Drawing::Font(L"Tahoma", 12, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
 				static_cast<System::Byte>(204)));
-			this->label1->Location = System::Drawing::Point(10, 29);
+			this->label1->Location = System::Drawing::Point(12, 23);
 			this->label1->Name = L"label1";
 			this->label1->Size = System::Drawing::Size(71, 19);
 			this->label1->TabIndex = 2;
@@ -256,13 +250,14 @@ namespace SerialApp {
 			// textBoxSpeed
 			// 
 			this->textBoxSpeed->ImeMode = System::Windows::Forms::ImeMode::NoControl;
-			this->textBoxSpeed->Location = System::Drawing::Point(121, 93);
+			this->textBoxSpeed->Location = System::Drawing::Point(16, 223);
 			this->textBoxSpeed->MaxLength = 6;
 			this->textBoxSpeed->Name = L"textBoxSpeed";
-			this->textBoxSpeed->Size = System::Drawing::Size(100, 21);
-			this->textBoxSpeed->TabIndex = 1;
+			this->textBoxSpeed->Size = System::Drawing::Size(67, 20);
+			this->textBoxSpeed->TabIndex = 4;
 			this->textBoxSpeed->TextAlign = System::Windows::Forms::HorizontalAlignment::Center;
 			this->textBoxSpeed->Leave += gcnew System::EventHandler(this, &MyForm::TextBoxSpeed_TextChanged);
+			this->textBoxSpeed->KeyDown += gcnew  KeyEventHandler(this, &MyForm::TextBoxSpeed_EnterPressed);
 			// 
 			// labelParam1
 			// 
@@ -271,39 +266,18 @@ namespace SerialApp {
 			this->labelParam1->FlatStyle = System::Windows::Forms::FlatStyle::System;
 			this->labelParam1->Font = (gcnew System::Drawing::Font(L"Tahoma", 12, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
 				static_cast<System::Byte>(204)));
-			this->labelParam1->Location = System::Drawing::Point(140, 71);
+			this->labelParam1->Location = System::Drawing::Point(14, 201);
 			this->labelParam1->Name = L"labelParam1";
-			this->labelParam1->Size = System::Drawing::Size(52, 19);
+			this->labelParam1->Size = System::Drawing::Size(66, 19);
 			this->labelParam1->TabIndex = 4;
-			this->labelParam1->Text = L"Speed";
-			// 
-			// labelParam2
-			// 
-			this->labelParam2->AutoSize = true;
-			this->labelParam2->FlatStyle = System::Windows::Forms::FlatStyle::System;
-			this->labelParam2->Font = (gcnew System::Drawing::Font(L"Tahoma", 12, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
-				static_cast<System::Byte>(204)));
-			this->labelParam2->Location = System::Drawing::Point(237, 71);
-			this->labelParam2->Name = L"labelParam2";
-			this->labelParam2->Size = System::Drawing::Size(90, 19);
-			this->labelParam2->TabIndex = 5;
-			this->labelParam2->Text = L"Pulse count";
-			// 
-			// textBoxPulse
-			// 
-			this->textBoxPulse->Location = System::Drawing::Point(227, 93);
-			this->textBoxPulse->Name = L"textBoxPulse";
-			this->textBoxPulse->Size = System::Drawing::Size(100, 21);
-			this->textBoxPulse->TabIndex = 2;
-			this->textBoxPulse->TextAlign = System::Windows::Forms::HorizontalAlignment::Center;
-			this->textBoxPulse->Leave += gcnew System::EventHandler(this, &MyForm::TextBoxPulse_TextChanged);
+			this->labelParam1->Text = L"Speed X";
 			// 
 			// buttonSend
 			// 
 			this->buttonSend->BackColor = System::Drawing::SystemColors::Control;
 			this->buttonSend->Enabled = false;
 			this->buttonSend->FlatStyle = System::Windows::Forms::FlatStyle::System;
-			this->buttonSend->Location = System::Drawing::Point(250, 264);
+			this->buttonSend->Location = System::Drawing::Point(197, 105);
 			this->buttonSend->Name = L"buttonSend";
 			this->buttonSend->Size = System::Drawing::Size(75, 23);
 			this->buttonSend->TabIndex = 7;
@@ -312,48 +286,15 @@ namespace SerialApp {
 			this->buttonSend->UseVisualStyleBackColor = false;
 			this->buttonSend->Click += gcnew System::EventHandler(this, &MyForm::ButtonSend_Click);
 			// 
-			// textBoxRX
-			// 
-			this->textBoxRX->Enabled = false;
-			this->textBoxRX->Location = System::Drawing::Point(14, 404);
-			this->textBoxRX->Name = L"textBoxRX";
-			this->textBoxRX->Size = System::Drawing::Size(230, 21);
-			this->textBoxRX->TabIndex = 8;
-			this->textBoxRX->TabStop = false;
-			this->textBoxRX->Text = L"Received Data";
-			// 
-			// textBoxTX
-			// 
-			this->textBoxTX->Location = System::Drawing::Point(14, 377);
-			this->textBoxTX->Name = L"textBoxTX";
-			this->textBoxTX->Size = System::Drawing::Size(230, 21);
-			this->textBoxTX->TabIndex = 9;
-			this->textBoxTX->TabStop = false;
-			this->textBoxTX->Text = L"Tranceived Data";
-			// 
-			// buttonSendCustom
-			// 
-			this->buttonSendCustom->BackColor = System::Drawing::SystemColors::Control;
-			this->buttonSendCustom->Enabled = false;
-			this->buttonSendCustom->FlatStyle = System::Windows::Forms::FlatStyle::System;
-			this->buttonSendCustom->Location = System::Drawing::Point(247, 375);
-			this->buttonSendCustom->Name = L"buttonSendCustom";
-			this->buttonSendCustom->Size = System::Drawing::Size(75, 50);
-			this->buttonSendCustom->TabIndex = 10;
-			this->buttonSendCustom->TabStop = false;
-			this->buttonSendCustom->Text = L"SendData";
-			this->buttonSendCustom->UseVisualStyleBackColor = false;
-			this->buttonSendCustom->Click += gcnew System::EventHandler(this, &MyForm::ButtonSendCustom_Click);
-			// 
 			// textBoxX
 			// 
-			this->textBoxX->Location = System::Drawing::Point(14, 148);
+			this->textBoxX->Location = System::Drawing::Point(15, 172);
 			this->textBoxX->Name = L"textBoxX";
-			this->textBoxX->Size = System::Drawing::Size(100, 21);
-			this->textBoxX->TabIndex = 3;
+			this->textBoxX->Size = System::Drawing::Size(67, 20);
+			this->textBoxX->TabIndex = 1;
 			this->textBoxX->TextAlign = System::Windows::Forms::HorizontalAlignment::Center;
 			this->textBoxX->Leave += gcnew System::EventHandler(this, &MyForm::TextBoxX_TextChanged);
-			this->textBoxX->KeyDown += gcnew KeyEventHandler(this, &MyForm::TextBoxX_EnterPressed);
+			this->textBoxX->KeyDown += gcnew  KeyEventHandler(this, &MyForm::TextBoxX_EnterPressed);
 			// 
 			// X_ax_label
 			// 
@@ -361,25 +302,24 @@ namespace SerialApp {
 			this->X_ax_label->FlatStyle = System::Windows::Forms::FlatStyle::System;
 			this->X_ax_label->Font = (gcnew System::Drawing::Font(L"Tahoma", 12, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
 				static_cast<System::Byte>(204)));
-			this->X_ax_label->Location = System::Drawing::Point(33, 126);
+			this->X_ax_label->Location = System::Drawing::Point(24, 150);
 			this->X_ax_label->Name = L"X_ax_label";
-			this->X_ax_label->Size = System::Drawing::Size(79, 19);
+			this->X_ax_label->Size = System::Drawing::Size(58, 19);
 			this->X_ax_label->TabIndex = 12;
-			this->X_ax_label->Text = L"X position";
+			this->X_ax_label->Text = L"X(mm)";
 			this->X_ax_label->Click += gcnew System::EventHandler(this, &MyForm::Label2_Click);
 			// 
 			// comboBoxCMD
 			// 
 			this->comboBoxCMD->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
 			this->comboBoxCMD->FormattingEnabled = true;
-			this->comboBoxCMD->Items->AddRange(gcnew cli::array< System::Object^  >(13) {
-				L"Set Direction", L"Set Speed", L"Set Pulse count",
-					L"Set XYZ position", L"Set X", L"Set Y", L"Set Z", L"Set Y(centered)", L"Set Z(centered)", L"Set mm(X)", L"Set mm(Y)", L"Set mm(Z)",
-					L"Set mm(XYZ)"
+			this->comboBoxCMD->Items->AddRange(gcnew cli::array< System::Object^  >(7) {
+				L"Set Speed", L"Set mm(X)", L"Set mm(Y)", L"Set mm(Z)",
+					L"Set mm(XYZ)", L"Set D8", L"Get coordinates"
 			});
-			this->comboBoxCMD->Location = System::Drawing::Point(123, 266);
+			this->comboBoxCMD->Location = System::Drawing::Point(88, 105);
 			this->comboBoxCMD->Name = L"comboBoxCMD";
-			this->comboBoxCMD->Size = System::Drawing::Size(121, 21);
+			this->comboBoxCMD->Size = System::Drawing::Size(94, 21);
 			this->comboBoxCMD->TabIndex = 13;
 			this->comboBoxCMD->TabStop = false;
 			this->comboBoxCMD->SelectedIndexChanged += gcnew System::EventHandler(this, &MyForm::ComboBox1_SelectedIndexChanged);
@@ -389,7 +329,7 @@ namespace SerialApp {
 			this->label2->AutoSize = true;
 			this->label2->Font = (gcnew System::Drawing::Font(L"Tahoma", 12, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
 				static_cast<System::Byte>(204)));
-			this->label2->Location = System::Drawing::Point(119, 240);
+			this->label2->Location = System::Drawing::Point(102, 83);
 			this->label2->Name = L"label2";
 			this->label2->Size = System::Drawing::Size(42, 19);
 			this->label2->TabIndex = 14;
@@ -401,11 +341,11 @@ namespace SerialApp {
 			this->Y_ax_label->FlatStyle = System::Windows::Forms::FlatStyle::System;
 			this->Y_ax_label->Font = (gcnew System::Drawing::Font(L"Tahoma", 12, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
 				static_cast<System::Byte>(204)));
-			this->Y_ax_label->Location = System::Drawing::Point(130, 126);
+			this->Y_ax_label->Location = System::Drawing::Point(97, 150);
 			this->Y_ax_label->Name = L"Y_ax_label";
-			this->Y_ax_label->Size = System::Drawing::Size(80, 19);
+			this->Y_ax_label->Size = System::Drawing::Size(59, 19);
 			this->Y_ax_label->TabIndex = 15;
-			this->Y_ax_label->Text = L"Y position";
+			this->Y_ax_label->Text = L"Y(mm)";
 			// 
 			// Z_ax_label
 			// 
@@ -413,61 +353,36 @@ namespace SerialApp {
 			this->Z_ax_label->FlatStyle = System::Windows::Forms::FlatStyle::System;
 			this->Z_ax_label->Font = (gcnew System::Drawing::Font(L"Tahoma", 12, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
 				static_cast<System::Byte>(204)));
-			this->Z_ax_label->Location = System::Drawing::Point(234, 126);
+			this->Z_ax_label->Location = System::Drawing::Point(171, 150);
 			this->Z_ax_label->Name = L"Z_ax_label";
-			this->Z_ax_label->Size = System::Drawing::Size(79, 19);
+			this->Z_ax_label->Size = System::Drawing::Size(58, 19);
 			this->Z_ax_label->TabIndex = 16;
-			this->Z_ax_label->Text = L"Z position";
+			this->Z_ax_label->Text = L"Z(mm)";
 			// 
 			// textBoxY
 			// 
-			this->textBoxY->Location = System::Drawing::Point(121, 148);
+			this->textBoxY->Location = System::Drawing::Point(88, 172);
 			this->textBoxY->Name = L"textBoxY";
-			this->textBoxY->Size = System::Drawing::Size(100, 21);
-			this->textBoxY->TabIndex = 4;
+			this->textBoxY->Size = System::Drawing::Size(68, 20);
+			this->textBoxY->TabIndex = 2;
 			this->textBoxY->TextAlign = System::Windows::Forms::HorizontalAlignment::Center;
 			this->textBoxY->Leave += gcnew System::EventHandler(this, &MyForm::TextBoxY_TextChanged);
-			this->textBoxY->KeyPress += gcnew  KeyPressEventHandler(this, &MyForm::TextBoxY_EnterPressed);
+			this->textBoxY->KeyDown += gcnew  KeyEventHandler(this, &MyForm::TextBoxY_EnterPressed);
 			// 
 			// textBoxZ
 			// 
-			this->textBoxZ->Location = System::Drawing::Point(228, 148);
+			this->textBoxZ->Location = System::Drawing::Point(162, 172);
 			this->textBoxZ->Name = L"textBoxZ";
-			this->textBoxZ->Size = System::Drawing::Size(100, 21);
-			this->textBoxZ->TabIndex = 5;
+			this->textBoxZ->Size = System::Drawing::Size(67, 20);
+			this->textBoxZ->TabIndex = 3;
 			this->textBoxZ->TextAlign = System::Windows::Forms::HorizontalAlignment::Center;
 			this->textBoxZ->Leave += gcnew System::EventHandler(this, &MyForm::TextBoxZ_TextChanged);
-			this->textBoxZ->KeyPress += gcnew  KeyPressEventHandler(this, &MyForm::TextBoxZ_EnterPressed);
-			// 
-			// radio_dirForward
-			// 
-			this->radio_dirForward->AutoSize = true;
-			this->radio_dirForward->Checked = true;
-			this->radio_dirForward->Font = (gcnew System::Drawing::Font(L"Tahoma", 9.75F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
-				static_cast<System::Byte>(204)));
-			this->radio_dirForward->Location = System::Drawing::Point(14, 74);
-			this->radio_dirForward->Name = L"radio_dirForward";
-			this->radio_dirForward->Size = System::Drawing::Size(74, 20);
-			this->radio_dirForward->TabIndex = 19;
-			this->radio_dirForward->Text = L"Forward";
-			this->radio_dirForward->UseVisualStyleBackColor = true;
-			// 
-			// radio_dirReverse
-			// 
-			this->radio_dirReverse->AutoSize = true;
-			this->radio_dirReverse->Font = (gcnew System::Drawing::Font(L"Tahoma", 9.75F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
-				static_cast<System::Byte>(204)));
-			this->radio_dirReverse->Location = System::Drawing::Point(14, 98);
-			this->radio_dirReverse->Name = L"radio_dirReverse";
-			this->radio_dirReverse->Size = System::Drawing::Size(72, 20);
-			this->radio_dirReverse->TabIndex = 20;
-			this->radio_dirReverse->Text = L"Reverse";
-			this->radio_dirReverse->UseVisualStyleBackColor = true;
+			this->textBoxZ->KeyDown += gcnew  KeyEventHandler(this, &MyForm::TextBoxZ_EnterPressed);
 			// 
 			// statusString
 			// 
 			this->statusString->Enabled = false;
-			this->statusString->Location = System::Drawing::Point(14, 318);
+			this->statusString->Location = System::Drawing::Point(16, 263);
 			this->statusString->Multiline = true;
 			this->statusString->Name = L"statusString";
 			this->statusString->Size = System::Drawing::Size(230, 49);
@@ -478,9 +393,9 @@ namespace SerialApp {
 			// textBoxCRC
 			// 
 			this->textBoxCRC->Enabled = false;
-			this->textBoxCRC->Location = System::Drawing::Point(250, 318);
+			this->textBoxCRC->Location = System::Drawing::Point(16, 318);
 			this->textBoxCRC->Name = L"textBoxCRC";
-			this->textBoxCRC->Size = System::Drawing::Size(72, 21);
+			this->textBoxCRC->Size = System::Drawing::Size(72, 20);
 			this->textBoxCRC->TabIndex = 22;
 			this->textBoxCRC->TabStop = false;
 			this->textBoxCRC->Text = L"CRC_result";
@@ -494,9 +409,9 @@ namespace SerialApp {
 				L"0", L"1", L"2", L"3", L"4", L"5", L"6",
 					L"7", L"8", L"9", L"10", L"11", L"12", L"13", L"14", L"15", L"16", L"17", L"18", L"19", L"20"
 			});
-			this->comboBoxAddress->Location = System::Drawing::Point(23, 266);
+			this->comboBoxAddress->Location = System::Drawing::Point(16, 105);
 			this->comboBoxAddress->Name = L"comboBoxAddress";
-			this->comboBoxAddress->Size = System::Drawing::Size(58, 21);
+			this->comboBoxAddress->Size = System::Drawing::Size(66, 21);
 			this->comboBoxAddress->TabIndex = 8;
 			this->comboBoxAddress->TabStop = false;
 			this->comboBoxAddress->SelectedIndexChanged += gcnew System::EventHandler(this, &MyForm::ComboBoxAddress_SelectedIndexChanged);
@@ -506,7 +421,7 @@ namespace SerialApp {
 			this->label3->AutoSize = true;
 			this->label3->Font = (gcnew System::Drawing::Font(L"Tahoma", 12, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
 				static_cast<System::Byte>(204)));
-			this->label3->Location = System::Drawing::Point(14, 240);
+			this->label3->Location = System::Drawing::Point(16, 83);
 			this->label3->Name = L"label3";
 			this->label3->Size = System::Drawing::Size(66, 19);
 			this->label3->TabIndex = 24;
@@ -540,51 +455,27 @@ namespace SerialApp {
 			this->timer1->Interval = 10;
 			this->timer1->Tick += gcnew System::EventHandler(this, &MyForm::Timer1_Tick);
 			// 
+			// textBoxD8
+			// 
+			this->textBoxD8->Location = System::Drawing::Point(88, 223);
+			this->textBoxD8->Name = L"textBoxD8";
+			this->textBoxD8->Size = System::Drawing::Size(67, 20);
+			this->textBoxD8->TabIndex = 5;
+			this->textBoxD8->TextAlign = System::Windows::Forms::HorizontalAlignment::Center;
+			this->textBoxD8->Leave += gcnew System::EventHandler(this, &MyForm::TextBoxD8_TextChanged);
+			this->textBoxD8->KeyDown += gcnew  KeyEventHandler(this, &MyForm::TextBoxD8_EnterPressed);
+			// 
 			// label4
 			// 
 			this->label4->AutoSize = true;
 			this->label4->FlatStyle = System::Windows::Forms::FlatStyle::System;
 			this->label4->Font = (gcnew System::Drawing::Font(L"Tahoma", 12, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
 				static_cast<System::Byte>(204)));
-			this->label4->Location = System::Drawing::Point(130, 172);
+			this->label4->Location = System::Drawing::Point(102, 201);
 			this->label4->Name = L"label4";
-			this->label4->Size = System::Drawing::Size(96, 19);
-			this->label4->TabIndex = 27;
-			this->label4->Text = L"Y (centered)";
-			// 
-			// label5
-			// 
-			this->label5->AutoSize = true;
-			this->label5->FlatStyle = System::Windows::Forms::FlatStyle::System;
-			this->label5->Font = (gcnew System::Drawing::Font(L"Tahoma", 12, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
-				static_cast<System::Byte>(204)));
-			this->label5->Location = System::Drawing::Point(234, 172);
-			this->label5->Name = L"label5";
-			this->label5->Size = System::Drawing::Size(95, 19);
-			this->label5->TabIndex = 28;
-			this->label5->Text = L"Z (centered)";
-			// 
-			// textBoxYC
-			// 
-			this->textBoxYC->Location = System::Drawing::Point(121, 195);
-			this->textBoxYC->MaxLength = 7;
-			this->textBoxYC->Name = L"textBoxYC";
-			this->textBoxYC->Size = System::Drawing::Size(100, 21);
-			this->textBoxYC->TabIndex = 6;
-			this->textBoxYC->TextAlign = System::Windows::Forms::HorizontalAlignment::Center;
-			this->textBoxYC->Leave += gcnew System::EventHandler(this, &MyForm::TextBoxYC_TextChanged);
-			this->textBoxYC->KeyPress += gcnew  KeyPressEventHandler(this, &MyForm::TextBoxYC_EnterPressed);
-			// 
-			// textBoxZC
-			// 
-			this->textBoxZC->Location = System::Drawing::Point(228, 195);
-			this->textBoxZC->MaxLength = 7;
-			this->textBoxZC->Name = L"textBoxZC";
-			this->textBoxZC->Size = System::Drawing::Size(100, 21);
-			this->textBoxZC->TabIndex = 7;
-			this->textBoxZC->TextAlign = System::Windows::Forms::HorizontalAlignment::Center;
-			this->textBoxZC->Leave += gcnew System::EventHandler(this, &MyForm::TextBoxZC_TextChanged);
-			this->textBoxZC->KeyPress += gcnew  KeyPressEventHandler(this, &MyForm::TextBoxZC_EnterPressed);
+			this->label4->Size = System::Drawing::Size(29, 19);
+			this->label4->TabIndex = 28;
+			this->label4->Text = L"D8";
 			// 
 			// MyForm
 			// 
@@ -592,18 +483,14 @@ namespace SerialApp {
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->BackColor = System::Drawing::SystemColors::ActiveCaption;
 			this->ClientSize = System::Drawing::Size(1008, 579);
-			this->Controls->Add(this->textBoxZC);
-			this->Controls->Add(this->textBoxYC);
-			this->Controls->Add(this->label5);
 			this->Controls->Add(this->label4);
+			this->Controls->Add(this->textBoxD8);
 			this->Controls->Add(this->buttonImageUpdate);
 			this->Controls->Add(this->pictureBox1);
 			this->Controls->Add(this->label3);
 			this->Controls->Add(this->comboBoxAddress);
 			this->Controls->Add(this->textBoxCRC);
 			this->Controls->Add(this->statusString);
-			this->Controls->Add(this->radio_dirReverse);
-			this->Controls->Add(this->radio_dirForward);
 			this->Controls->Add(this->textBoxZ);
 			this->Controls->Add(this->textBoxY);
 			this->Controls->Add(this->Z_ax_label);
@@ -612,12 +499,7 @@ namespace SerialApp {
 			this->Controls->Add(this->comboBoxCMD);
 			this->Controls->Add(this->X_ax_label);
 			this->Controls->Add(this->textBoxX);
-			this->Controls->Add(this->buttonSendCustom);
-			this->Controls->Add(this->textBoxTX);
-			this->Controls->Add(this->textBoxRX);
 			this->Controls->Add(this->buttonSend);
-			this->Controls->Add(this->textBoxPulse);
-			this->Controls->Add(this->labelParam2);
 			this->Controls->Add(this->labelParam1);
 			this->Controls->Add(this->textBoxSpeed);
 			this->Controls->Add(this->label1);
@@ -660,7 +542,6 @@ namespace SerialApp {
 					this->statusString->Text = "Connected";
 					comportOpenState = 1;
 					this->comboBox_comportList->Enabled = 0;
-					this->buttonSendCustom->Enabled = 1;
 					this->comboBoxAddress->Enabled = 1;
 				}
 				else {
@@ -673,7 +554,6 @@ namespace SerialApp {
 					this->statusString->Text = "Disconnected";
 					this->btn_connect->Text = "Connect";
 					this->comboBox_comportList->Enabled = 1;
-					this->buttonSendCustom->Enabled = 0;
 					this->buttonSend->Enabled = 0;
 					this->comboBoxAddress->Enabled = 0;
 					comportOpenState = 0;
@@ -695,12 +575,10 @@ namespace SerialApp {
 	private: System::Void ComboBox_comportList_SelectedIndexChanged(System::Object^ sender, System::EventArgs^ e) {
 
 
-
 	}
 	private: System::Void ComboBox_comportList_SelectedIndexChanged_DropDown(Object^ sender, System::EventArgs^ e) {
 		findPorts();
 	}
-
 
 	private: System::Void Label2_Click(System::Object^ sender, System::EventArgs^ e) {
 	}
@@ -709,74 +587,11 @@ namespace SerialApp {
 			if (!this->buttonSend->Enabled)this->buttonSend->Enabled = 1;
 		}
 	}
-	private: System::Void ButtonSendCustom_Click(System::Object^ sender, System::EventArgs^ e) {
-		try {
-			this->_serialPort->Write(this->textBoxTX->Text);
-			try {
-				this->textBoxRX->Text = this->_serialPort->ReadExisting();
-			}
-			catch (TimeoutException^) {
-				this->statusString->Text = "Timeout RX";
-			}
-		}
-		catch (ArgumentNullException^) {
-			this->statusString->Text = "null string";
-		}
-		catch (InvalidOperationException^) {
-			this->statusString->Text = "InvalidOperation";
-		}
 
-	}
-
-		   //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-		   //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-		   ///!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	private: System::Void ButtonSend_Click(System::Object^ sender, System::EventArgs^ e) {
-
 		System::String^ cmdState = this->comboBoxCMD->Text;
 
 		int readByteArray[50];
-		if (cmdState == "Set Direction") {
-			//Format byte order:
-			//{netAddress}{CMD}{start_reg_hi}{start_reg_lo}{reg_cnt}{byte_cnt}{data}....{crc_hi}{crc_lo}
-			array<Byte>^ sendDataChars = gcnew array<Byte>{0x01, 0x10, 0x00, 0x00, 0x00, 0x01, 0x02, 0x00, 0x00, 0x00, 0x00};
-			//Byte sendArray[11] = { 0x01, 0x10, 0x00, 0x02, 0x00, 0x01, 0x02, 0x00, 0x00, 0x00, 0x00 };
-			try {
-				//sendDataChars[3] = 0x02;
-				sendDataChars[5] = 0x01;
-				sendDataChars[6] = 0x02;
-
-				if (this->radio_dirForward->Checked) {
-					sendDataChars[8] = 0x01;
-				}
-				else {
-					sendDataChars[8] = 0x00;
-				}
-				UInt16 temp_crc_result = CRC_Calc16(sendDataChars, sendDataChars->Length - 2);
-				this->textBoxCRC->Text = Convert::ToString(temp_crc_result, 16);
-				sendDataChars[9] = (Byte)(temp_crc_result & 0xff);
-				sendDataChars[10] = (Byte)(temp_crc_result >> 8);
-				this->_serialPort->Write(sendDataChars, 0, sendDataChars->Length);
-				try {
-					for (int i_rb = 0; i_rb < 8; i_rb++) {
-						readByteArray[i_rb] = this->_serialPort->ReadByte();
-					}
-					if (readByteArray[0] == 0x01) {
-						System::String^ formatedString = System::String::Format("0x{0,2:X2} 0x{1,2:X2} 0x{2,2:X2} 0x{3,2:X2} 0x{4,2:X2} 0x{5,2:X2} 0x{6,2:X2} 0x{7,2:X2}", \
-							readByteArray[0], readByteArray[1], readByteArray[2], readByteArray[3], readByteArray[4], \
-							readByteArray[5], readByteArray[6], readByteArray[7]);
-						//this->statusString->Text = Convert::ToString(sendDataChars->Length);
-						this->statusString->Text = formatedString;
-					}
-				}
-				catch (TimeoutException^) {
-					this->statusString->Text = "TimeoutRx_sendCmd";
-				}
-			}
-			catch (InvalidOperationException^) {
-				;
-			}
-		}
 		if (cmdState == "Set Speed") {
 			array<Byte>^ sendDataChars = gcnew array<Byte>{0x01, 0x10, 0x00, 0x01, 0x00, 0x01, 0x02, 0x00, 0x00, 0x00, 0x00};
 			try {
@@ -810,37 +625,7 @@ namespace SerialApp {
 				;
 			}
 		}
-		if (cmdState == "Set Pulse count") {
-			array<Byte>^ sendDataChars = gcnew array<Byte>{0x01, 0x10, 0x00, 0x05, 0x00, 0x01, 0x02, 0x00, 0x00, 0x00, 0x00};
-			try {
-				sendDataChars[7] = Convert::ToByte(motorPulseCnt >> 8);
-				sendDataChars[8] = Convert::ToByte(motorPulseCnt & 0xff);
-				UInt16 temp_crc_result = CRC_Calc16(sendDataChars, sendDataChars->Length - 2);
-				this->textBoxCRC->Text = Convert::ToString(temp_crc_result, 16);
-				sendDataChars[10] = (Byte)(temp_crc_result >> 8);
-				sendDataChars[9] = (Byte)(temp_crc_result & 0xff);
 
-				this->_serialPort->Write(sendDataChars, 0, sendDataChars->Length);
-				try {
-					for (int i_rb = 0; i_rb < 8; i_rb++) {
-						readByteArray[i_rb] = this->_serialPort->ReadByte();
-					}
-					if (readByteArray[0] == 0x01) {
-						System::String^ formatedString = System::String::Format("0x{0,2:X2} 0x{1,2:X2} 0x{2,2:X2} 0x{3,2:X2} 0x{4,2:X2} 0x{5,2:X2} 0x{6,2:X2} 0x{7,2:X2}", \
-							readByteArray[0], readByteArray[1], readByteArray[2], readByteArray[3], readByteArray[4], \
-							readByteArray[5], readByteArray[6], readByteArray[7]);
-						//this->statusString->Text = Convert::ToString(sendDataChars->Length);
-						this->statusString->Text = formatedString;
-					}
-				}
-				catch (TimeoutException^) {
-					this->statusString->Text = "TimeoutRx_sendCmd";
-				}
-			}
-			catch (InvalidOperationException^) {
-				;
-			}
-		}
 		if (cmdState == "Set XYZ position") {
 			array<Byte>^ sendDataChars = gcnew array<Byte>{0x01, 0x10, 0x00, 0x02, 0x00, 0x03, 0x06, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};//15bytes
 			try {
@@ -937,11 +722,11 @@ namespace SerialApp {
 				;
 			}
 		}
-		if (cmdState == "Set Z") {
-			array<Byte>^ sendDataChars = gcnew array<Byte>{0x01, 0x10, 0x00, 0x04, 0x00, 0x01, 0x02, 0x00, 0x00, 0x00, 0x00};//11bytes
+		if (cmdState == "Set D8") {
+			array<Byte>^ sendDataChars = gcnew array<Byte>{0x01, 0x10, 0x00, 0x08, 0x00, 0x01, 0x02, 0x00, 0x00, 0x00, 0x00};//11bytes
 			try {
-				sendDataChars[7] = Convert::ToByte(dowBoyZ >> 8);
-				sendDataChars[8] = Convert::ToByte(dowBoyZ & 0xff);
+				sendDataChars[7] = Convert::ToByte(dowBoyD8 >> 8);
+				sendDataChars[8] = Convert::ToByte(dowBoyD8 & 0xff);
 
 				UInt16 temp_crc_result = CRC_Calc16(sendDataChars, sendDataChars->Length - 2);
 				this->textBoxCRC->Text = Convert::ToString(temp_crc_result, 16);
@@ -956,7 +741,6 @@ namespace SerialApp {
 						System::String^ formatedString = System::String::Format("0x{0,2:X2} 0x{1,2:X2} 0x{2,2:X2} 0x{3,2:X2} 0x{4,2:X2} 0x{5,2:X2} 0x{6,2:X2} 0x{7,2:X2}", \
 							readByteArray[0], readByteArray[1], readByteArray[2], readByteArray[3], readByteArray[4], \
 							readByteArray[5], readByteArray[6], readByteArray[7]);
-						//this->statusString->Text = Convert::ToString(sendDataChars->Length);
 						this->statusString->Text = formatedString;
 					}
 				}
@@ -968,78 +752,10 @@ namespace SerialApp {
 				;
 			}
 		}
-		if (cmdState == "Set Y(centered)") {
-			array<Byte>^ sendDataChars = gcnew array<Byte>{0x01, 0x10, 0x00, 0x06, 0x00, 0x01, 0x02, 0x00, 0x00, 0x00, 0x00};//11bytes
-			try {
-				sendDataChars[7] = (dowBoyYC >> 8);
-				sendDataChars[8] = (dowBoyYC & 0xff);
-				//sendDataChars[8] = dowBoyYC >> 8;
 
-				UInt16 temp_crc_result = CRC_Calc16(sendDataChars, sendDataChars->Length - 2);
-				this->textBoxCRC->Text = Convert::ToString(temp_crc_result, 16);
-				sendDataChars[10] = (Byte)(temp_crc_result >> 8);
-				sendDataChars[9] = (Byte)(temp_crc_result & 0xff);
-				this->_serialPort->Write(sendDataChars, 0, sendDataChars->Length);
-				try {
-					for (int i_rb = 0; i_rb < 8; i_rb++) {
-						readByteArray[i_rb] = this->_serialPort->ReadByte();
-					}
-					if (readByteArray[0] == 0x01) {
-						System::String^ formatedString = System::String::Format("0x{0,2:X2} 0x{1,2:X2} 0x{2,2:X2} 0x{3,2:X2} 0x{4,2:X2} 0x{5,2:X2} 0x{6,2:X2} 0x{7,2:X2}", \
-							readByteArray[0], readByteArray[1], readByteArray[2], readByteArray[3], readByteArray[4], \
-							readByteArray[5], readByteArray[6], readByteArray[7]);
-						//this->statusString->Text = Convert::ToString(sendDataChars->Length);
-						this->statusString->Text = formatedString;
-					}
-				}
-				catch (TimeoutException^) {
-					this->statusString->Text = "TimeoutRx_sendCmd";
-				}
-			}
-			catch (InvalidOperationException^) {
-				;
-			}
-		}
-		if (cmdState == "Set Z(centered)") {
-			array<Byte>^ sendDataChars = gcnew array<Byte>{0x01, 0x10, 0x00, 0x07, 0x00, 0x01, 0x02, 0x00, 0x00, 0x00, 0x00};//11bytes
-			try {
-				sendDataChars[7] = (dowBoyZC >> 8);
-				sendDataChars[8] = (dowBoyZC & 0xff);
-				//sendDataChars[8] = dowBoyYC >> 8;
-
-				UInt16 temp_crc_result = CRC_Calc16(sendDataChars, sendDataChars->Length - 2);
-				this->textBoxCRC->Text = Convert::ToString(temp_crc_result, 16);
-				sendDataChars[10] = (Byte)(temp_crc_result >> 8);
-				sendDataChars[9] = (Byte)(temp_crc_result & 0xff);
-				this->_serialPort->Write(sendDataChars, 0, sendDataChars->Length);
-				try {
-					for (int i_rb = 0; i_rb < 8; i_rb++) {
-						readByteArray[i_rb] = this->_serialPort->ReadByte();
-					}
-					if (readByteArray[0] == 0x01) {
-						System::String^ formatedString = System::String::Format("0x{0,2:X2} 0x{1,2:X2} 0x{2,2:X2} 0x{3,2:X2} 0x{4,2:X2} 0x{5,2:X2} 0x{6,2:X2} 0x{7,2:X2}", \
-							readByteArray[0], readByteArray[1], readByteArray[2], readByteArray[3], readByteArray[4], \
-							readByteArray[5], readByteArray[6], readByteArray[7]);
-						//this->statusString->Text = Convert::ToString(sendDataChars->Length);
-						this->statusString->Text = formatedString;
-					}
-				}
-				catch (TimeoutException^) {
-					this->statusString->Text = "TimeoutRx_sendCmd";
-				}
-			}
-			catch (InvalidOperationException^) {
-				;
-			}
-
-		}
-
-		//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-		///!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-		//start
 		//Set mm(X)
 		if (cmdState == "Set mm(X)") {
-			array<Byte>^ sendDataChars = gcnew array<Byte>{0x01, 0x10, 0x00, 0x0A, 0x00, 0x01, 0x02, 0x00, 0x00, 0x00, 0x00};//11bytes
+			array<Byte>^ sendDataChars = gcnew array<Byte>{0x01, 0x10, 0x00, 0x02, 0x00, 0x01, 0x02, 0x00, 0x00, 0x00, 0x00};//11bytes
 			try {
 				sendDataChars[7] = (dowBoyX >> 8);
 				sendDataChars[8] = (dowBoyX & 0xff);
@@ -1072,10 +788,10 @@ namespace SerialApp {
 		}
 		//Set mm(Y)
 		if (cmdState == "Set mm(Y)") {
-			array<Byte>^ sendDataChars = gcnew array<Byte>{0x01, 0x10, 0x00, 0x0B, 0x00, 0x01, 0x02, 0x00, 0x00, 0x00, 0x00};//11bytes
+			array<Byte>^ sendDataChars = gcnew array<Byte>{0x01, 0x10, 0x00, 0x04, 0x00, 0x01, 0x02, 0x00, 0x00, 0x00, 0x00};//11bytes
 			try {
-				sendDataChars[7] = (dowBoyYC >> 8);
-				sendDataChars[8] = (dowBoyYC & 0xff);
+				sendDataChars[7] = (dowBoyY >> 8);
+				sendDataChars[8] = (dowBoyY & 0xff);
 				//sendDataChars[8] = dowBoyYC >> 8;
 
 				UInt16 temp_crc_result = CRC_Calc16(sendDataChars, sendDataChars->Length - 2);
@@ -1105,10 +821,10 @@ namespace SerialApp {
 		}
 		//Set mm(Z)
 		if (cmdState == "Set mm(Z)") {
-			array<Byte>^ sendDataChars = gcnew array<Byte>{0x01, 0x10, 0x00, 0x0C, 0x00, 0x01, 0x02, 0x00, 0x00, 0x00, 0x00};//11bytes
+			array<Byte>^ sendDataChars = gcnew array<Byte>{0x01, 0x10, 0x00, 0x06, 0x00, 0x01, 0x02, 0x00, 0x00, 0x00, 0x00};//11bytes
 			try {
-				sendDataChars[7] = (dowBoyZC >> 8);
-				sendDataChars[8] = (dowBoyZC & 0xff);
+				sendDataChars[7] = (dowBoyZ >> 8);
+				sendDataChars[8] = (dowBoyZ & 0xff);
 				//sendDataChars[8] = dowBoyYC >> 8;
 
 				UInt16 temp_crc_result = CRC_Calc16(sendDataChars, sendDataChars->Length - 2);
@@ -1137,18 +853,18 @@ namespace SerialApp {
 			}
 		}
 		if (cmdState == "Set mm(XYZ)") {
-			array<Byte>^ sendDataChars = gcnew array<Byte>{0x01, 0x10, 0x00, 0x0A, 0x00, 0x03, 0x06, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};//15bytes
+			array<Byte>^ sendDataChars = gcnew array<Byte>{0x01, 0x10, 0x00, 0x02, 0x00, 0x06, 0x0C, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};//21bytes
 			try {
 				sendDataChars[7] = Convert::ToByte(dowBoyX >> 8);
 				sendDataChars[8] = Convert::ToByte(dowBoyX & 0xff);
-				sendDataChars[9] = Convert::ToByte(dowBoyYC >> 8);
-				sendDataChars[10] = Convert::ToByte(dowBoyYC & 0xff);
-				sendDataChars[11] = Convert::ToByte(dowBoyZC >> 8);
-				sendDataChars[12] = Convert::ToByte(dowBoyZC & 0xff);
+				sendDataChars[11] = Convert::ToByte(dowBoyY >> 8);
+				sendDataChars[12] = Convert::ToByte(dowBoyY & 0xff);
+				sendDataChars[15] = Convert::ToByte(dowBoyZ >> 8);
+				sendDataChars[16] = Convert::ToByte(dowBoyZ & 0xff);
 				UInt16 temp_crc_result = CRC_Calc16(sendDataChars, sendDataChars->Length - 2);
 				this->textBoxCRC->Text = Convert::ToString(temp_crc_result, 16);
-				sendDataChars[14] = (Byte)(temp_crc_result >> 8);
-				sendDataChars[13] = (Byte)(temp_crc_result & 0xff);
+				sendDataChars[20] = (Byte)(temp_crc_result >> 8);
+				sendDataChars[19] = (Byte)(temp_crc_result & 0xff);
 				this->_serialPort->Write(sendDataChars, 0, sendDataChars->Length);
 				try {
 					for (int i_rb = 0; i_rb < 8; i_rb++) {
@@ -1170,15 +886,47 @@ namespace SerialApp {
 				;
 			}
 		}
-		//end
-		//
-		//****************************
-		//
+
+		if (cmdState == "Get coordinates") {
+			array<Byte>^ sendDataChars = gcnew array<Byte>{0x01, 0x03, 0x00, 0x0A, 0x00, 0x08, 0x00, 0x00};//9bytes
+			try {
+				this->_serialPort->ReadExisting();/*  -------------  inserted after pull  request  ++++++++++++++++ */
+				UInt16 temp_crc_result = CRC_Calc16(sendDataChars, sendDataChars->Length - 2);
+				this->textBoxCRC->Text = Convert::ToString(temp_crc_result, 16);
+				sendDataChars[8] = (Byte)(temp_crc_result >> 8);
+				sendDataChars[7] = (Byte)(temp_crc_result & 0xff);
+				this->_serialPort->Write(sendDataChars, 0, sendDataChars->Length);
+				try {
+					for (int i_rb = 0; i_rb < 21; i_rb++) {
+						readByteArray[i_rb] = this->_serialPort->ReadByte();
+					}
+					if (readByteArray[0] == 0x01) {
+						System::String^ formatedString = System::String::Format("0x{0,2:X2} 0x{1,2:X2} 0x{2,2:X2} 0x{3,2:X2} 0x{4,2:X2} 0x{5,2:X2} 0x{6,2:X2} 0x{7,2:X2} 0x{8,2:X2} 0x{9,2:X2} 0x{10,2:X2} 0x{11,2:X2} 0x{12,2:X2}", \
+							readByteArray[0], readByteArray[1], readByteArray[2], readByteArray[3], readByteArray[4], \
+							readByteArray[5], readByteArray[6], readByteArray[7], readByteArray[8], readByteArray[9], readByteArray[10], readByteArray[11], readByteArray[12]);
+						//this->statusString->Text = Convert::ToString(sendDataChars->Length);
+						this->statusString->Text = formatedString;
+					}
+				}
+				catch (TimeoutException^) {
+					this->statusString->Text = "TimeoutRx_sendCmd";
+					System::String^ formatedString = System::String::Format("0x{0,2:X2} 0x{1,2:X2} 0x{2,2:X2} 0x{3,2:X2} 0x{4,2:X2} 0x{5,2:X2} 0x{6,2:X2} 0x{7,2:X2} 0x{8,2:X2} 0x{9,2:X2} 0x{10,2:X2} 0x{11,2:X2} 0x{12,2:X2}", \
+						readByteArray[0], readByteArray[1], readByteArray[2], readByteArray[3], readByteArray[4], \
+						readByteArray[5], readByteArray[6], readByteArray[7], readByteArray[8], readByteArray[9], readByteArray[10], readByteArray[11], readByteArray[12]);
+					//this->statusString->Text = Convert::ToString(sendDataChars->Length);
+					this->statusString->Text = formatedString;
+				}
+			}
+			catch (InvalidOperationException^) {
+				;
+			}
+		}
+
 	}
 	private: System::Void TextBoxSpeed_TextChanged(System::Object^ sender, System::EventArgs^ e) {
 		try {
 			motorSpeed = Convert::ToUInt32(this->textBoxSpeed->Text);
-
+			this->statusString->Text = "Speed X changed";
 		}
 		catch (FormatException^) {
 			this->statusString->Text = "only numbers";
@@ -1191,25 +939,11 @@ namespace SerialApp {
 			motorSpeed = 65535;
 		}
 	}
-	private: System::Void TextBoxPulse_TextChanged(System::Object^ sender, System::EventArgs^ e) {
-		try {
-			motorPulseCnt = Convert::ToUInt32(this->textBoxPulse->Text);
-		}
-		catch (FormatException^) {
-			this->statusString->Text = "only numbers";
-			this->textBoxPulse->Text = "0";
-			motorPulseCnt = 0;
-		}
-		catch (OverflowException^) {
-			this->statusString->Text = "to large value";
-			this->textBoxPulse->Text = "65535";
-			motorPulseCnt = 65535;
-		}
-	}
+
 	private: System::Void TextBoxX_TextChanged(System::Object^ sender, System::EventArgs^ e) {
 		try {
 			dowBoyX = Convert::ToUInt16(this->textBoxX->Text);
-			this->statusString->Text = "X pos changed";
+			this->statusString->Text = "X changed";
 		}
 		catch (FormatException^) {
 			this->statusString->Text = "only numbers";
@@ -1223,6 +957,64 @@ namespace SerialApp {
 		}
 
 	}
+	
+	private: System::Void TextBoxD8_TextChanged(System::Object^ sender, System::EventArgs^ e) {
+		try {
+			dowBoyD8 = Convert::ToUInt16(this->textBoxX->Text);
+			this->statusString->Text = "D8 changed";
+		}
+		catch (FormatException^) {
+			this->statusString->Text = "only numbers";
+			this->textBoxD8->Text = "0";
+			dowBoyD8 = 0;
+		}
+		catch (OverflowException^) {
+			this->statusString->Text = "to large value";
+			this->textBoxD8->Text = "65535";
+			dowBoyD8 = 65535;
+		}
+
+	}
+
+	private: UInt16 GetCoordinate(Byte coordinate) {
+		array<Byte>^ sendDataChars = gcnew array<Byte>{0x01, 0x03, 0x00, 0x0A, 0x00, 0x08, 0x00, 0x00};//9bytes
+		UInt16 tempCoordinateArray[20];
+		UInt16 coordinateResult;
+		try {
+			UInt16 temp_crc_result = CRC_Calc16(sendDataChars, sendDataChars->Length - 2);
+			this->textBoxCRC->Text = Convert::ToString(temp_crc_result, 16);
+			sendDataChars[8] = (Byte)(temp_crc_result >> 8);
+			sendDataChars[7] = (Byte)(temp_crc_result & 0xff);
+			this->_serialPort->Write(sendDataChars, 0, sendDataChars->Length);
+			try {
+				for (int i_rb = 0; i_rb < 21; i_rb++) {
+					tempCoordinateArray[i_rb] = this->_serialPort->ReadByte();
+				}
+			}
+			catch (TimeoutException^) {
+				this->statusString->Text = "TimeoutRx_sendCmd";
+			}
+			if ((coordinate == 0)||(coordinate == 'X') || (coordinate == 'x')) {
+				coordinateResult = (tempCoordinateArray[4]|(tempCoordinateArray[3]<<8));
+			}
+			if ((coordinate == 1) || (coordinate == 'Y') || (coordinate == 'y')) {
+				coordinateResult = (tempCoordinateArray[8] | (tempCoordinateArray[7] << 8));
+			}
+			if ((coordinate == 2) || (coordinate == 'Z') || (coordinate == 'z')) {
+				coordinateResult = (tempCoordinateArray[12] | (tempCoordinateArray[11] << 8));
+			}
+			if ((coordinate == 3) || (coordinate == 'F') || (coordinate == 'f')) {
+				coordinateResult = (tempCoordinateArray[16] | (tempCoordinateArray[15] << 8));
+			}
+	
+		}
+		catch (InvalidOperationException^) {
+			;
+		}
+
+		return coordinateResult;
+	}
+	
 	private: System::Void TextBoxX_EnterPressed(System::Object^ sender, KeyEventArgs^ e) {
 		if (e->KeyCode == Keys::Enter) {
 			this->textBoxY->Focus();
@@ -1263,27 +1055,30 @@ namespace SerialApp {
 		}
 
 	}
-	private: System::Void TextBoxY_EnterPressed(System::Object^ sender, KeyPressEventArgs^ e) {
-		if (e->KeyChar == char(13)) {
+	private: System::Void TextBoxY_EnterPressed(System::Object^ sender, KeyEventArgs^ e) {
+		if (e->KeyCode == Keys::Enter) {
 			this->textBoxZ->Focus();
 		}
 
 	}
-	private: System::Void TextBoxZ_EnterPressed(System::Object^ sender, KeyPressEventArgs^ e) {
-		if (e->KeyChar == char(13)) {
-			this->textBoxYC->Focus();
+	private: System::Void TextBoxZ_EnterPressed(System::Object^ sender, KeyEventArgs^ e) {
+		if (e->KeyCode == Keys::Enter) {
+			this->textBoxD8->Focus();
 		}
 	}
-	private: System::Void TextBoxYC_EnterPressed(System::Object^ sender, KeyPressEventArgs^ e) {
-		if (e->KeyChar == char(13)) {
-			this->textBoxZC->Focus();
+	private: System::Void TextBoxD8_EnterPressed(System::Object^ sender, KeyEventArgs^ e) {
+		if (e->KeyCode == Keys::Enter) {
+			this->textBoxSpeed->Focus();
 		}
 	}
-	private: System::Void TextBoxZC_EnterPressed(System::Object^ sender, KeyPressEventArgs^ e) {
-		if (e->KeyChar == char(13)) {
+	private: System::Void TextBoxSpeed_EnterPressed(System::Object^ sender, KeyEventArgs^ e) {
+		if (e->KeyCode == Keys::Enter) {
 			this->textBoxX->Focus();
 		}
 	}
+
+
+
 	private: System::Void TextBoxY_TextChanged(System::Object^ sender, System::EventArgs^ e) {
 		try {
 			dowBoyY = Convert::ToUInt16(this->textBoxY->Text);
@@ -1318,54 +1113,8 @@ namespace SerialApp {
 		}
 
 	}
-	private: System::Void TextBoxYC_TextChanged(System::Object^ sender, System::EventArgs^ e) {
-		try {
-			dowBoyYC = Convert::ToInt16(this->textBoxYC->Text);
-			if (dowBoyYC > 900) {
-				dowBoyYC = 900;
-				this->textBoxYC->Text = "900";
-			}
-			if (dowBoyYC < -900) {
-				dowBoyYC = -900;
-				this->textBoxYC->Text = "-900";
-			}
-			//this->statusString->Text = "Z pos changed";
-		}
-		catch (FormatException^) {
-			this->statusString->Text = "only numbers";
-			this->textBoxYC->Text = "0";
-			dowBoyYC = 0;
-		}
-		catch (OverflowException^) {
-			//this->statusString->Text = "to large value";
-			this->textBoxYC->Text = "900";
-			dowBoyYC = 900;
-		}
-	}
-	private: System::Void TextBoxZC_TextChanged(System::Object^ sender, System::EventArgs^ e) {
-		try {
-			dowBoyZC = Convert::ToInt16(this->textBoxZC->Text);
-			if (dowBoyZC > 900) {
-				dowBoyZC = 900;
-				this->textBoxZC->Text = "900";
-			}
-			if (dowBoyZC < -900) {
-				dowBoyZC = -900;
-				this->textBoxZC->Text = "-900";
-			}
-			//this->statusString->Text = "Z pos changed";
-		}
-		catch (FormatException^) {
-			this->statusString->Text = "only numbers";
-			this->textBoxZC->Text = "0";
-			dowBoyZC = 0;
-		}
-		catch (OverflowException^) {
-			//this->statusString->Text = "to large value";
-			this->textBoxZC->Text = "900";
-			dowBoyZC = 900;
-		}
-	}
+
+
 	private: System::UInt16 CRC_Calc16(array<Byte>^ dataArray, int length) {//array<Byte>^  //Byte *dataArray
 		UInt16 crc = 0xffff;
 		UInt16 table_result = 0;
@@ -1388,8 +1137,8 @@ namespace SerialApp {
 		//this->pictureBox1->Image = bm;//Bitmap::FromHbitmap(hBitmap);
 
 
-		cv::Mat image;
-		image = cv::imread("D:\\Python\\ex2.png", cv::IMREAD_COLOR);
+		//cv::Mat image;
+		//image = cv::imread("D:\\Python\\ex2.png", cv::IMREAD_COLOR);
 		//cv::namedWindow("Image", cv::WINDOW_AUTOSIZE);
 		//cv::imshow("Display image", image);
 
@@ -1397,7 +1146,7 @@ namespace SerialApp {
 		//hBit = CreateBitmap(image.cols, image.rows, 1, 32, image.data);
 		//Bitmap^ bmp = Bitmap::FromHbitmap((IntPtr)hBit);
 		//this->pictureBox1->Image = image;
-
+		/*
 		if (image.data != NULL) {
 
 			System::Drawing::Graphics^ graphics = pictureBox1->CreateGraphics();
@@ -1408,27 +1157,26 @@ namespace SerialApp {
 
 			this->timer1->Enabled = true;
 		}
-
-
+		*/
 
 	}
 	private: System::Void Timer1_Tick(System::Object^ sender, System::EventArgs^ e) {
-		cv::Mat image;
+		//cv::Mat image;
 
 		imageOrder++;
 		if (imageOrder >= 11)imageOrder = 1;
 
-		cv::String filenameString = cv::format("D:\\VSprojects\\ConsoleSerial\\pictures\\d2_%d.png", imageOrder);//"d2_{d}.png"->Format(imageOrder);
+		//cv::String filenameString = cv::format("D:\\VSprojects\\ConsoleSerial\\pictures\\d2_%d.png", imageOrder);//"d2_{d}.png"->Format(imageOrder);
 		//cv::String filenameString = "D:\\VSprojects\\ConsoleSerial\\pictures\\d2_.png";
 
 		//image = cv::imread("D:\\VSprojects\\ConsoleSerial\\pictures\\d2_1.png", cv::IMREAD_COLOR);
-		image = cv::imread(filenameString, cv::IMREAD_COLOR);
+		//image = cv::imread(filenameString, cv::IMREAD_COLOR);
 
-		System::Drawing::Graphics^ graphics = pictureBox1->CreateGraphics();
-		System::IntPtr ptr(image.ptr());
-		System::Drawing::Bitmap^ b = gcnew System::Drawing::Bitmap(image.cols, image.rows, image.step, System::Drawing::Imaging::PixelFormat::Format24bppRgb, ptr);
-		System::Drawing::RectangleF rect(0, 0, pictureBox1->Width, pictureBox1->Height);
-		graphics->DrawImage(b, rect);
+		//System::Drawing::Graphics^ graphics = pictureBox1->CreateGraphics();
+		//System::IntPtr ptr(image.ptr());
+		//System::Drawing::Bitmap^ b = gcnew System::Drawing::Bitmap(image.cols, image.rows, image.step, System::Drawing::Imaging::PixelFormat::Format24bppRgb, ptr);
+		//System::Drawing::RectangleF rect(0, 0, pictureBox1->Width, pictureBox1->Height);
+		//graphics->DrawImage(b, rect);
 
 	}
 
