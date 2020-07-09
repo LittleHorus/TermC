@@ -6,6 +6,7 @@
 #include <stdint.h>
 #include "stdlib.h"
 #include "stdio.h"
+#include "ntc.h"
 
 typedef struct sRTC_struct{
 		 unsigned year : 6; 
@@ -43,7 +44,8 @@ void ft812_userL4(uint8_t paramMenu);
 void ft812_userL5(uint8_t paramMenu);
 void ft812_userL6(uint8_t paramMenu);
 void ft812_userL7(uint8_t paramMenu);
-
+void term_struct_init(void);
+char * getTextFromValueInt16(int16_t valueInput);
 
 GPIO_InitTypeDef GPIO_InitStructure;
 ADC_InitTypeDef ADC__InitStructure;
@@ -60,7 +62,7 @@ uint32_t main_counter = 0;
 uint32_t delay_ms_counter = 0;
 uint16_t rtc_1sec_cnt = 0;
 uint8_t temp_actualGVSLevel_value[2], temp_needGVSLevel_value[2], temp_actualCOLevel_value[2], temp_needCOLevel_value[2];
-
+uint16_t tempCommonUpdateTimer = 1000;//default value to decrement counter
 uint16_t tim16Input = 0;
 
 float temperature[8];//4*8 = 32 
@@ -98,6 +100,9 @@ uint8_t tempPumpGVSStateManual;
 uint8_t tempFanStateManual;
 uint8_t tempScrewReversStateManual;   
 uint8_t tempTemperatureCO = 0, tempTemperatureGVS = 0, tempHystCO = 0, tempHystGVS = 0; 
+
+uint8_t screw_dir = 0;
+
 //создаем экземпляр этого типа
 volatile RTC_struct rtc;
 struct termC_Struct{
@@ -114,10 +119,10 @@ struct termC_Struct{
     uint8_t fanState;//работа вентилятора
     uint8_t fanPower;
     uint8_t fanSpeed;//скорость работы вентилятора
-    uint8_t tempCO_settled;//ЦО установленная температура
-    uint8_t tempCO_current;//ЦО текущая температура
-    uint8_t tempHW_settled;//ГВС установленная температура
-    uint8_t tempHW_current;//ГВС текущая температура
+    int16_t tempCO_settled;//ЦО установленная температура
+    int16_t tempCO_current;//ЦО текущая температура
+    int16_t tempHW_settled;//ГВС установленная температура
+    int16_t tempHW_current;//ГВС текущая температура
     uint8_t tempControlMode;//определяет, какой из датчиков используется для контроля работы котла
     uint8_t tempControlState;//определяет стадию работы - розжиг или поддержание или тушение
     int8_t tempOutdoor;
@@ -150,6 +155,28 @@ void fan_control(uint8_t fanSpeed){
   //
   
 }
+
+
+void screw_forward_run(void){
+  if(screw_dir == SCREW_STATE_BACKWARD){
+    SCREW_BACKWARD_STOP;
+  }
+  SCREW_FORWARD_RUN;
+}
+void screw_forward_stop(void){
+  SCREW_FORWARD_STOP;
+}
+void screw_backward_run(void){
+  if(screw_dir == SCREW_STATE_FORWARD){
+    SCREW_FORWARD_STOP;
+  }
+  SCREW_BACKWARD_RUN;  
+}
+void screw_backward_stop(void){
+  SCREW_BACKWARD_STOP;
+}
+
+
 void TIM16_IRQHandler(void) {
   if(TIM_GetITStatus(TIM16, TIM_IT_CC1) == SET) 
   {
@@ -204,6 +231,8 @@ void tim_input(void){
   TIM_ITConfig(TIM16, TIM_IT_CC1, ENABLE);  
 }
 
+
+
 /******************************************************************************/
 int main(){
   RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOA, ENABLE);
@@ -212,7 +241,7 @@ int main(){
   RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI2, ENABLE);
   //rtc_init();
   //RTC_Update(&rtc);
-  RTC_Config();
+  //RTC_Config();
   adc_init(); 
   gpio_init();
   spi_init();
@@ -226,61 +255,23 @@ int main(){
   ft812_custom_font_init();
   ft812_mainWindowCustom();
   //ft812_paramWindowCustom();
-  termStruct.termStartStop = 0;
-  termStruct.termRegime = MANUAL;
-  termStruct.screwRegime = MANUAL;
-  termStruct.screwCurrentLimit = 3000;//3A
-  termStruct.fanState = FAN_OFF;
-  termStruct.fanSpeed = 10;//10%
-  termStruct.tempCO_settled = 60;//in degree
-  termStruct.tempCO_current = 0;
-  termStruct.tempHW_settled = 60;
-  termStruct.tempHW_current = 0;
-  termStruct.tempControlMode = 0;
-  termStruct.tempControlState = 0;
-  termStruct.tempScrew = 0;
-  termStruct.screwState = 0;
-  termStruct.pumpCOState = 0;
-  termStruct.pumpGVSState = 0;
-  termStruct.fanState = 0;
-  termStruct.screwReversState = 0; 
-  termStruct.screwRunSleepTime = 10;
-  termStruct.screwRunWorkTime = 5;
-  termStruct.screwSupportSleepTime = 60;
-  termStruct.screwSupportWorkTime = 5;
-  termStruct.fanSupportSleepTime = 60;
-  termStruct.fanSupportWorkTime = 10;
-  termStruct.fanPower = 0;
-  termStruct.bunkerState = 0;//empty as default
-  termStruct.screwStateManual = 0;
-  termStruct.pumpCOStateManual = 0;
-  termStruct.pumpGVSStateManual = 0;
-  termStruct.fanStateManual = 0;
-  termStruct.screwReversStateManual = 0;
-  termStruct.hystCO = 1;
-  termStruct.hystGVS = 1;
-  termStruct.temperatureCO = 45;
-  termStruct.temperatureGVS = 45;
+  term_struct_init();
   
   while(1){
-    temp_actualGVSLevel_value[0] = adc_ch_array[5];
-    temp_actualGVSLevel_value[1] = adc_ch_array[5];
-
-    temp_needGVSLevel_value[0] = 0x30 + 6;
-    temp_needGVSLevel_value[1] = 0x30 + 0;    
-
-    temp_actualCOLevel_value[0] = adc_ch_array[6];
-    temp_actualCOLevel_value[1] = adc_ch_array[6];
-
-    temp_needCOLevel_value[0] = 0x30 + 6;
-    temp_needCOLevel_value[1] = 0x30 + 0;    
+    
+    if(tempCommonUpdateTimer == 0){
+      tempCommonUpdateTimer = 10000;//1sec
+      termStruct.tempCO_current =  calc_temperature(GET_TEMP_CO)/10;
+      termStruct.tempHW_current =  calc_temperature(GET_TEMP_HW)/10;
+      
+    }
+     
 
     if(menuLevel == MENU_LEVEL_MAIN){
       if(displayRefreshTime == 0){
         displayRefreshTime = 200;
         ft812_mainWindowCustom();
         
-
       }  
       if(btnPlusShortPressEventCnt != 0){
         btnPlusShortPressEventCnt = 0;
@@ -326,13 +317,11 @@ int main(){
           tempScrewRunWorkTime = termStruct.screwRunWorkTime;
           tempScrewSupportSleepTime = termStruct.screwSupportSleepTime;
           tempScrewSupportWorkTime = termStruct.screwSupportWorkTime;
-
         }
         if(userMenuLevelPosition == 3){
           tempFanSupportSleepTime = termStruct.fanSupportSleepTime;
           tempFanSupportWorkTime = termStruct.fanSupportWorkTime;
           tempFanPower = termStruct.fanPower;
-          
         }
         btnAcceptShortPressEventCnt = 0;
       }      
@@ -400,7 +389,6 @@ int main(){
             tempTemperatureGVS = termStruct.temperatureGVS;
             tempHystCO = termStruct.hystCO;
             tempHystGVS = termStruct.hystGVS;
-            
             
         }
         
@@ -626,6 +614,14 @@ void gpio_init(void){
     BASE_GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
     BASE_GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_DOWN;
     GPIO_Init(GPIOC, &BASE_GPIO_InitStructure);    
+    
+    BASE_GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2 | GPIO_Pin_3;
+    BASE_GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
+    BASE_GPIO_InitStructure.GPIO_Speed = GPIO_Speed_Level_1;
+    BASE_GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+    BASE_GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_DOWN;
+    GPIO_Init(GPIOC, &BASE_GPIO_InitStructure);       
+    
 }
 /******************************************************************************/
 void adc_init(void){ 
@@ -657,14 +653,14 @@ void adc_init(void){
     ADC__InitStructure.ADC_ScanDirection = ADC_ScanDirection_Upward;
     ADC_Init(ADC1, &ADC__InitStructure);
      
-    ADC_ChannelConfig(ADC1, ADC_Channel_0 , ADC_SampleTime_55_5Cycles);//screws current
-    ADC_ChannelConfig(ADC1, ADC_Channel_1 , ADC_SampleTime_55_5Cycles);//termostat
-    ADC_ChannelConfig(ADC1, ADC_Channel_2 , ADC_SampleTime_55_5Cycles);//bunker
-    ADC_ChannelConfig(ADC1, ADC_Channel_3 , ADC_SampleTime_55_5Cycles);//screw
-    ADC_ChannelConfig(ADC1, ADC_Channel_4 , ADC_SampleTime_55_5Cycles);//dym gas
-    ADC_ChannelConfig(ADC1, ADC_Channel_5 , ADC_SampleTime_55_5Cycles);//gvs
-    ADC_ChannelConfig(ADC1, ADC_Channel_6 , ADC_SampleTime_55_5Cycles);//co
-    ADC_ChannelConfig(ADC1, ADC_Channel_7 , ADC_SampleTime_55_5Cycles);//external temp
+    ADC_ChannelConfig(ADC1, ADC_Channel_0 , ADC_SampleTime_239_5Cycles);//screws current
+    ADC_ChannelConfig(ADC1, ADC_Channel_1 , ADC_SampleTime_239_5Cycles);//termostat
+    ADC_ChannelConfig(ADC1, ADC_Channel_2 , ADC_SampleTime_239_5Cycles);//bunker
+    ADC_ChannelConfig(ADC1, ADC_Channel_3 , ADC_SampleTime_239_5Cycles);//screw
+    ADC_ChannelConfig(ADC1, ADC_Channel_4 , ADC_SampleTime_239_5Cycles);//dym gas
+    ADC_ChannelConfig(ADC1, ADC_Channel_5 , ADC_SampleTime_239_5Cycles);//gvs
+    ADC_ChannelConfig(ADC1, ADC_Channel_6 , ADC_SampleTime_239_5Cycles);//co
+    ADC_ChannelConfig(ADC1, ADC_Channel_7 , ADC_SampleTime_239_5Cycles);//external temp
     
     ADC_GetCalibrationFactor(ADC1);
     ADC_Cmd(ADC1, ENABLE);
@@ -759,12 +755,21 @@ void TIM2_IRQHandler(void){
         rtc_1sec_cnt = 0;
     }
     
+    if(termStruct.screwStateManual == 0) screw_forward_stop();
+    if(termStruct.screwStateManual == 1) screw_forward_run();
+    
+
+    if(tempCommonUpdateTimer!=0)tempCommonUpdateTimer--;
+
+    
+    
     btnCommonCnt++;
     if(BTN_PLUS_RESPONSE == 1)btnPlusCnt++;
     if(BTN_MINUS_RESPONSE == 1)btnMinusCnt++;
     if(BTN_ACCEPT_RESPONSE == 1)btnAcceptCnt++;
     if(BTN_CANCEL_RESPONSE == 1)btnCancelCnt++;
     
+    //buttons processing
     if(btnCommonCnt >= BUTTON_RESPONSE_PERIOD){
       if(btnPlusCnt  > BUTTON_UNBOUNCE){
         btnPlusState = 1;
@@ -1026,7 +1031,6 @@ void ft812_mainWindowCustom(void){
   FT8_cmd_dl(DL_CLEAR_RGB | 0x000000);
   FT8_cmd_dl(DL_CLEAR | CLR_COL | CLR_STN | CLR_TAG);
 
-
   FT8_cmd_dl(DL_COLOR_RGB | GREY_COLOR);
     
   uint8_t offset = 30;
@@ -1063,8 +1067,14 @@ void ft812_mainWindowCustom(void){
   FT8_cmd_text(85,40+offset, 19, 2048, "\xf8");
   //ft_custom_font_edit("Т.ЦО"); //60°
   //FT8_cmd_text(10,60+offset, 11, 0, outstring);  
-  FT8_cmd_text(60,90+offset, 25, 2048, "72");
+  
+  //tempCO_current
+  char* stringForText = getTextFromValueInt16(termStruct.tempCO_current);
+  
+  //FT8_cmd_text(60,90+offset, 25, 2048, "72");
+  FT8_cmd_text(60,90+offset, 25, 2048, stringForText);
   FT8_cmd_text(65,90+offset, 19, 2048, "\xf8");
+  free(stringForText);
   
   ft_custom_font_edit("Уст. Т.ГВС");// 47°
   FT8_cmd_text(140,10+offset, 11, 0, outstring);
@@ -1087,6 +1097,7 @@ void ft812_mainWindowCustom(void){
   */
   
   /* display the logo */
+  /*
   FT8_cmd_dl(DL_COLOR_RGB | 0xff0000);
   FT8_cmd_dl(BEGIN(BITMAPS));
   FT8_cmd_dl(VERTEX_FORMAT(0));
@@ -1097,7 +1108,7 @@ void ft812_mainWindowCustom(void){
   FT8_cmd_dl(VERTEX2F(210, 80));
   
   FT8_cmd_dl(DL_END);    
-
+*/
   FT8_cmd_dl(DL_DISPLAY);
   FT8_cmd_dl(CMD_SWAP);
   FT8_end_cmd_burst(); /* stop writing to the cmd-fifo */
@@ -1772,8 +1783,6 @@ void ft812_userL4(uint8_t paramMenu){
   ft_custom_font_edit(" 1.2.Перерыв(сек)"); FT8_cmd_text(10,50+offset, 11, 0, outstring);
   ft_custom_font_edit("2.Макс. мощность"); FT8_cmd_text(10,70+offset, 11, 0, outstring);  
 
-
-
   if(menuLevel == MENU_LEVEL_ACCEPT){
     FT8_cmd_dl(DL_COLOR_RGB | 0x246e37);
     if(paramMenu == 0)FT8_cmd_rect(220, 50, 319, 70, 1);
@@ -1992,7 +2001,7 @@ void ft812_userL7(uint8_t paramMenu){
 
   FT8_cmd_dl(DL_COLOR_RGB | 0xeb9123);
   ft_custom_font_edit("Заполнить бункер"); FT8_cmd_text(10,5, 11, 0, outstring);
-  FT8_cmd_line(0,25,319,25,3);
+  FT8_cmd_line(0, 25, 319, 25, 3);
   FT8_cmd_dl(DL_COLOR_RGB | 0x246e37);
   if(paramMenu == 0)FT8_cmd_rect(0, 30, 319, 50, 1);
   if(paramMenu == 1)FT8_cmd_rect(0, 50, 319, 70, 1);
@@ -2013,4 +2022,73 @@ uint8_t setCurrentLimit(uint16_t current){
   termStruct.screwCurrentLimit = tCurrent;
   
   return 0;
+}
+
+
+void term_struct_init(void){
+  termStruct.termStartStop = 0;
+  termStruct.termRegime = MANUAL;
+  termStruct.screwRegime = MANUAL;
+  termStruct.screwCurrentLimit = 3000;//3A
+  termStruct.fanState = FAN_OFF;
+  termStruct.fanSpeed = 10;//10%
+  termStruct.tempCO_settled = 60;//in degree
+  termStruct.tempCO_current = 0;
+  termStruct.tempHW_settled = 60;
+  termStruct.tempHW_current = 0;
+  termStruct.tempControlMode = 0;
+  termStruct.tempControlState = 0;
+  termStruct.tempScrew = 0;
+  termStruct.screwState = 0;
+  termStruct.pumpCOState = 0;
+  termStruct.pumpGVSState = 0;
+  termStruct.fanState = 0;
+  termStruct.screwReversState = 0; 
+  termStruct.screwRunSleepTime = 10;
+  termStruct.screwRunWorkTime = 5;
+  termStruct.screwSupportSleepTime = 60;
+  termStruct.screwSupportWorkTime = 5;
+  termStruct.fanSupportSleepTime = 60;
+  termStruct.fanSupportWorkTime = 10;
+  termStruct.fanPower = 0;
+  termStruct.bunkerState = 0;//empty as default
+  termStruct.screwStateManual = 0;
+  termStruct.pumpCOStateManual = 0;
+  termStruct.pumpGVSStateManual = 0;
+  termStruct.fanStateManual = 0;
+  termStruct.screwReversStateManual = 0;
+  termStruct.hystCO = 1;
+  termStruct.hystGVS = 1;
+  termStruct.temperatureCO = 45;
+  termStruct.temperatureGVS = 45;  
+  
+}
+
+char * getTextFromValueInt16(int16_t valueInput){
+  char* stringOutput = malloc(4);
+  int16_t tempValue = valueInput;
+  
+  if(tempValue >= 0){
+    if(tempValue >= 100){
+      stringOutput[0] = 0x30+tempValue/100;
+      stringOutput[1] = 0x30+(tempValue%100)/10;
+      stringOutput[2] = 0x30+(tempValue%10);
+      stringOutput[3] = '\0';
+    }
+    if((tempValue < 100)&&(tempValue >= 10)){
+      stringOutput[0] = ' ';
+      stringOutput[1] = 0x30+(tempValue%100)/10;
+      stringOutput[2] = 0x30+(tempValue%10);
+      stringOutput[3] = '\0';
+    }
+    if(tempValue < 10){
+      stringOutput[0] = ' ';
+      stringOutput[1] = ' ';
+      stringOutput[2] = 0x30+(tempValue%10);
+      stringOutput[3] = '\0';
+    }
+  
+  }
+  
+  return stringOutput;
 }

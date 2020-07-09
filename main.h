@@ -3,6 +3,41 @@
 #define MENU_LEVEL_PARAMETERS 2
 #define MENU_LEVEL_ACCEPT 3
 
+#define SCREWRUN_WORKTIME_MAX 180
+#define SCREWRUN_SLEEPTIME_MAX 180
+#define SCREWSUPPORT_WORKTIME_MAX 180
+#define SCREWSUPPORT_SLEEPTIME_MAX 600
+#define FANSUPPORT_WORKTIME_MAX 180
+#define FANSUPPORT_SLEEPTIME_MAX 600
+#define FAN_POWER_MAX 100
+#define FAN_POWER_STEP 5
+#define SCREW_INC_STEP 5
+#define FAN_INC_STEP 5
+
+#define TEMP_CO_MAX 85
+#define TEMP_CO_STEP 5
+#define TEMP_GVS_MAX 85
+#define TEMP_GVS_STEP 5
+
+#define GET_TEMP_EXTERNAL adc_ch_array[7]
+#define GET_TEMP_CO adc_ch_array[6]
+#define GET_TEMP_HW adc_ch_array[5]
+#define GET_TEMP_DG adc_ch_array[4]
+#define GET_TEMP_SCREW adc_ch_array[3]
+#define GET_TEMP_BUNKER adc_ch_array[2]
+#define GET_TERMOSTATE adc_ch_array[1]
+#define GET_CURRENT_SCREW adc_ch_array[0]
+
+
+
+#define SCREW_STATE_STANDBY 0
+#define SCREW_STATE_BACKWARD 2
+#define SCREW_STATE_FORWARD 1
+#define SCREW_BACKWARD_STOP GPIO_ResetBits(GPIOC, GPIO_Pin_3)
+#define SCREW_BACKWARD_RUN GPIO_SetBits(GPIOC, GPIO_Pin_3)
+#define SCREW_FORWARD_STOP GPIO_ResetBits(GPIOC, GPIO_Pin_2)
+#define SCREW_FORWARD_RUN GPIO_SetBits(GPIOC, GPIO_Pin_2)
+
 #define MANUAL 0
 #define AUTO 1
 #define FAN_OFF 0
